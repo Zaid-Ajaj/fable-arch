@@ -1,10 +1,15 @@
 {
-    "module": "amd",
-    "sourceMaps": true,
-    "projFile": "./src/WebApp.fsproj",
-    "outDir": "out",
-    "scripts": {
-        "prebuild": "npm install",
-        "postbuild": "node node_modules/webpack/bin/webpack"
-    }
+  "sourceMaps": true,
+  "projFile": "./src/WebApp.fsproj",
+  "outDir": "./out",
+  // Add babel-plugin-transform-runtime to optimize the helper
+  // functions Babel adds to every file.
+  // Don't forget to install also the babel-runtime package.
+  "babelPlugins": [ "transform-runtime" ],
+  // The 'bundle' option can be a boolean or a string.
+  // If a string and ends with config.js is deemed a config file.
+  "rollup": "rollup.config.js",
+  "scripts": {
+    "prebuild": "npm install"
+  }
 }

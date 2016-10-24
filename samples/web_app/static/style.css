@@ -1,0 +1,13 @@
+.header {
+  line-height: 1.6em;
+  background: #202020;
+}
+
+.pure-menu-selected .pure-menu-link {
+  color: #fff;
+}
+
+.pure-menu-active > .pure-menu-link, .pure-menu-link:hover, .pure-menu-link:focus {
+    background-color: #eee;
+    color: #000;
+}

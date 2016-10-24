@@ -11,6 +11,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "project", "project", "{BF60
 		webpack.config.js = webpack.config.js
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "static", "static", "{A51FF66F-24F1-472B-A76C-D5E8332ED458}"
+	ProjectSection(SolutionItems) = preProject
+		static\style.css = static\style.css
+	EndProjectSection
+EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "WebApp", "src\WebApp.fsproj", "{861B39F3-785E-45AB-90B4-3CC720C1EC0B}"
 EndProject
 Global
