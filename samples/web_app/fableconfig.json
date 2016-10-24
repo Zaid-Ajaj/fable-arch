@@ -6,10 +6,18 @@
   // functions Babel adds to every file.
   // Don't forget to install also the babel-runtime package.
   "babelPlugins": [ "transform-runtime" ],
-  // The 'bundle' option can be a boolean or a string.
-  // If a string and ends with config.js is deemed a config file.
-  "rollup": "rollup.config.js",
   "scripts": {
     "prebuild": "npm install"
+  },
+  // Rollup configuration to add virtual dom named exports
+  "rollup": {
+    "dest": "./public/js/bundle.js",
+    "plugins": {
+      "commonjs": {
+        "namedExports": {
+          "virtual-dom": [ "h", "create", "diff", "patch" ]
+        }
+      }
+    }
   }
 }
