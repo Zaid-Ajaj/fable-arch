@@ -6,9 +6,6 @@
   // functions Babel adds to every file.
   // Don't forget to install also the babel-runtime package.
   "babelPlugins": [ "transform-runtime" ],
-  "scripts": {
-    "prebuild": "npm install"
-  },
   // Rollup configuration to add virtual dom named exports
   "rollup": {
     "dest": "./public/js/bundle.js",

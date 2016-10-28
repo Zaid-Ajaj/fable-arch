@@ -8,7 +8,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "project", "project", "{BF60
 		fableconfig.json = fableconfig.json
 		index.html = index.html
 		package.json = package.json
-		webpack.config.js = webpack.config.js
+		setup.js = setup.js
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "static", "static", "{A51FF66F-24F1-472B-A76C-D5E8332ED458}"

@@ -46,18 +46,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="../node_modules/fable-arch/Fable.Arch.RouteParser.fs">
-      <Link>Fable.Arch.RouteParser.fs</Link>
-    </Compile>
-    <Compile Include="../node_modules/fable-arch/Fable.Arch.Html.fs">
-      <Link>Fable.Arch.Html.fs</Link>
-    </Compile>
-    <Compile Include="../node_modules/fable-arch/Fable.Arch.App.fs">
-      <Link>Fable.Arch.App.fs</Link>
-    </Compile>
-    <Compile Include="../node_modules/fable-arch/Fable.Arch.Virtualdom.fs">
-      <Link>Fable.Arch.Virtualdom.fs</Link>
-    </Compile>
+    <Compile Include="Fable.Arch.Html.fs" />
+    <Compile Include="Fable.Arch.App.fs" />
+    <Compile Include="Fable.Arch.VirtualDom.fs" />
+    <Compile Include="Fable.Arch.RouteParser.fs" />
     <Compile Include="libs\Aether.fs" />
     <Compile Include="Common.fs" />
     <Compile Include="Pages\Index.fs" />
