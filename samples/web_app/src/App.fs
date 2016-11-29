@@ -71,7 +71,6 @@ module Main =
 
 
   let update model action =
-    console.log action
     match action with
     | NavigateTo route ->
       match route with
@@ -119,7 +118,6 @@ module Main =
     | NoOp -> model, []
 
   let view model =
-    console.log model.CurrentPage
     let pageHtml =
       match model.CurrentPage with
       | Index -> Html.map IndexActions (Pages.Index.view model.SubModels.Index.Value)
@@ -179,3 +177,5 @@ module Main =
   |> withSubscriber (routeSubscriber locationHandler routerF)
   |> start
   |> ignore
+
+  Database.openDb()

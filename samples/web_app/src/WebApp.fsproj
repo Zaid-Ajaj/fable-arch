@@ -51,6 +51,8 @@
     <Compile Include="Fable.Arch.VirtualDom.fs" />
     <Compile Include="Fable.Arch.RouteParser.fs" />
     <Compile Include="libs\Aether.fs" />
+    <Compile Include="IndexedStorage.fs" />
+    <Compile Include="Database.fs" />
     <Compile Include="Common.fs" />
     <Compile Include="Pages\Index.fs" />
     <Compile Include="Pages\About.fs" />
