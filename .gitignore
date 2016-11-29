@@ -268,3 +268,7 @@ docs/output/
 temp/
 
 .DS_Store
+
+# Web app sample specific
+/samples/web_app/src/Fable.Arch.*
+
