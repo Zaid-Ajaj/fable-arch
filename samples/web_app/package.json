@@ -3,27 +3,28 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "build": "npm run setup && node_modules\\.bin\\fable",
     "dev": "concurrently \"npm run serve\" \"npm run build -- -w\"",
-    "build": "npm run setup && fable",
-    "serve": "http-server .",
-    "setup": "node setup.js"
+    "serve": "http-server . -c-1 -s",
+    "setup": "node setup.js",
+    "watch": "npm run setup && node_modules\\.bin\\fable -t dev"
   },
   "dependencies": {
     "babel-runtime": "^6.11.6",
     "core-js": "^2.4.1",
-    "fable-core": "next",
+    "fable-core": "^0.7.11",
     "virtual-dom": "^2.1.1",
     "purecss": "^0.6.0",
     "normalize.css": "^5.0.0",
     "concurrently": "^3.1.0"
   },
   "devDependencies": {
-    "http-server": "^0.9.0",
-    "fable-compiler": "next",
-    "fable-arch": "^0.9.5",
-    "source-map-loader": "^0.1.5",
-    "webpack": "^1.13.2",
     "babel-plugin-transform-runtime": "^6.15.0",
-    "cpx": "^1.5.0"
+    "cpx": "^1.5.0",
+    "fable-arch": "^0.9.5",
+    "fable-compiler": "^0.7.14",
+    "http-server": "^0.9.0",
+    "source-map-loader": "^0.1.5",
+    "webpack": "^1.13.2"
   }
 }

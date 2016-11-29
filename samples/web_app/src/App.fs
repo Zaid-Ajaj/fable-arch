@@ -57,6 +57,9 @@ module Main =
     static member SubModels_ =
       (fun r -> r.SubModels), (fun v r -> { r with SubModels = v } )
 
+    static member CurrentPage_ =
+      (fun r -> r.CurrentPage), (fun v r -> { r with CurrentPage = v } )
+
 
   type Actions
     = NoOp
@@ -68,6 +71,7 @@ module Main =
 
 
   let update model action =
+    console.log action
     match action with
     | NavigateTo route ->
       match route with
@@ -76,18 +80,21 @@ module Main =
             model
             |> Optic.set (Model.SubModels_ >-> SubModels.Index_) Pages.Index.Model.Initial
             |> Optic.set (Model.SubModels_ >-> SubModels.Menu_ >-> Menu.Model.CurrentPage_) route
+            |> Optic.set (Model.CurrentPage_) route
           m', []
       | About ->
           let m' =
             model
             |> Optic.set (Model.SubModels_ >-> SubModels.About_) Pages.About.Model.Initial
             |> Optic.set (Model.SubModels_ >-> SubModels.Menu_ >-> Menu.Model.CurrentPage_) route
+            |> Optic.set (Model.CurrentPage_) route
           m', []
       | User subRoute ->
           let m' =
             model
             |> Optic.set (Model.SubModels_ >-> SubModels.User_) (Pages.User.Dispatcher.Model.Initial(subRoute))
             |> Optic.set (Model.SubModels_ >-> SubModels.Menu_ >-> Menu.Model.CurrentPage_) route
+            |> Optic.set (Model.CurrentPage_) route
           m', []
     | IndexActions act ->
         let (res, action) = Pages.Index.update model.SubModels.Index.Value act
@@ -112,6 +119,7 @@ module Main =
     | NoOp -> model, []
 
   let view model =
+    console.log model.CurrentPage
     let pageHtml =
       match model.CurrentPage with
       | Index -> Html.map IndexActions (Pages.Index.view model.SubModels.Index.Value)
@@ -147,7 +155,6 @@ module Main =
 
 
   let router = createRouter routes mapToRoute
-
 
   let locationHandler =
     {

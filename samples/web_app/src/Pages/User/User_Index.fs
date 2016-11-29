@@ -29,4 +29,4 @@ module Index =
   let view model =
     div
       []
-      [ text "Index" ]
+      [ text "Index user" ]
