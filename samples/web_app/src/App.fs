@@ -171,11 +171,11 @@ module Main =
 
   let routerF m = router.Route m.Message
 
-  createApp Model.Initial view update Virtualdom.createRender
-  |> withStartNodeSelector "#app"
-  |> withProducer (routeProducer locationHandler router)
-  |> withSubscriber (routeSubscriber locationHandler routerF)
-  |> start
-  |> ignore
+//  createApp Model.Initial view update Virtualdom.createRender
+//  |> withStartNodeSelector "#app"
+//  |> withProducer (routeProducer locationHandler router)
+//  |> withSubscriber (routeSubscriber locationHandler routerF)
+//  |> start
+//  |> ignore
 
-  Database.openDb()
+  Database.main()

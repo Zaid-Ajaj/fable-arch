@@ -2,9 +2,11 @@
 
 open Fable.Core
 open Fable.Import.Browser
-open Fable.Core.JsInterop
 open System
-open Fable.Helpers.IndexedStorage
+
+open Herebris.SimpleDatabase
+open Fable.Core.JsInterop
+open Fable.PowerPack
 
 module Database =
   type Gender =
@@ -18,7 +20,6 @@ module Database =
       Email: string
       Gender: Gender
     }
-
 
   module Setup =
 
@@ -44,107 +45,32 @@ module Database =
         }
       ]
 
-  type Storage() =
-    interface DBImplementation with
-      member self.Version = 1
-      member self.Upgrade (db: DBUpgrade) =
-        let userStore = db.createStore<User>(AutoIncrement)
+  let main () =
+    let db = new Database()
+    db.CreateStore<User>()
 
-        // Populate some data
-        Setup.patients
-        |> List.iter(fun x ->
-          userStore.add x
-          |> ignore
-        )
-
-  let openDb () =
-    let db = new IndexedDB<Storage>()
-
-    let user =
-      { Firstname = "Maxime"
-        Surname = "Mangel"
-        Email = "mangel.maxime@outlook.com"
-        Age = 24
-        Gender = Female
-      }
-
-    Async.StartWithContinuations(
-      db.``use store read write 1``<User, obj>(fun store ->
-        store.addAsync(user)
-      ),
-      (fun result ->
-        console.log result
-      ),
-      (fun exn ->
-        console.error exn.Message
-      ),
-      (fun _ -> ())
+    Setup.patients
+    |> List.iter( fun x ->
+      db.AddItem<User> x
     )
 
+    let test = db.GetItems<User>(fun x ->
+      x.Age = 24
+    )
 
+    //printf "%A" test
 
+    promise {
+      return! db.GetAll<User>()
+    }
+    |> Promise.map(fun x ->
+      console.log x
+    )
+    |> Promise.catch(fun x ->
+      console.log x
+    )
+    |> ignore
 
-//
-//  let mutable db : IDBDatabase = null
-//
-//  let simpleLog (req: IDBRequest) =
-//    req.onerror <- (fun ev ->
-//      console.error (sprintf "Error: %A" ev.target?error)
-//      null
-//    )
-//    req.onsuccess <- (fun ev ->
-//      console.log ("Success")
-//      null
-//    )
-//
-//  let openDb (cb: unit -> unit) () =
-//    console.log "openDb..."
-//
-//    let test =
-//      async {
-//        let! test = DBFactory.OpenAsync("FableArch")
-//        return "maxime"
-//      }
-//
-//    console.log test
+    //console.log (db.Get<User>(1))
 
-//    let req = indexedDB.``open``("FableArch")
-//    req.onsuccess <- (fun ev ->
-//      db <- unbox ev.target?result
-//      cb ()
-//      null
-//    )
-//    req.onerror <- (fun ev ->
-//      console.error (sprintf "openDb: %A" ev.target?errorCode)
-//      null
-//    )
-
-//    req.onupgradeneeded <- (fun ev ->
-//      if ev.newVersion = 1. then
-//          let db = extractDb ev
-//          let store = db.createObjectStore<User>(AutoIncrement)
-//
-//          store.createIndex("Email_Unique", U2.Case1 "Email", true)
-//          |> ignore
-//
-//          Setup.patients
-//          |> List.iter(fun x ->
-//            console.log x.Gender
-//            store.add(x)
-//            |> simpleLog
-//          )
-//      null
-//    )
-
-//  let selectUserById id =
-//    let transaction = db.transaction(U2.Case1("User"), "readonly")
-//    let store = transaction.objectStore("User")
-//
-//    let ob = store.get(id)
-//    ob.onsuccess <- (fun ev ->
-//      let user = unbox<User> (unbox<IDBOpenDBRequest> ev.target).result
-//      console.log user.Gender
-//      console.log user.Age
-//      null
-//    )
-
+    //db.Console()zdz
