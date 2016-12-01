@@ -29,3 +29,17 @@ module Common =
         | UserApi.Show id -> Some (sprintf "/user/%i" id)
 
   let voidLinkAction<'T> : Attribute<'T> = attribute "href" "javascript:void(0)"
+
+  [<AutoOpen>]
+  module Types =
+    type Gender =
+    | Male
+    | Female
+
+    type UserRecord =
+      { Firstname: string
+        Surname: string
+        Age: int
+        Email: string
+        Gender: Gender
+      }

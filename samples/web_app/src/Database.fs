@@ -7,19 +7,9 @@ open System
 open Herebris.SimpleDatabase
 open Fable.Core.JsInterop
 open Fable.PowerPack
+open WebApp.Common
 
 module Database =
-  type Gender =
-    | Male
-    | Female
-
-  type User =
-    { Firstname: string
-      Surname: string
-      Age: int
-      Email: string
-      Gender: Gender
-    }
 
   module Setup =
 
@@ -45,32 +35,12 @@ module Database =
         }
       ]
 
-  let main () =
-    let db = new Database()
-    db.CreateStore<User>()
+  let db = new SimpleDatabase()
+
+  let init () =
+    db.CreateStore<UserRecord>()
 
     Setup.patients
-    |> List.iter( fun x ->
-      db.AddItem<User> x
+    |> List.iter(fun x ->
+      db.AddItem<UserRecord> x
     )
-
-    let test = db.GetItems<User>(fun x ->
-      x.Age = 24
-    )
-
-    //printf "%A" test
-
-    promise {
-      return! db.GetAll<User>()
-    }
-    |> Promise.map(fun x ->
-      console.log x
-    )
-    |> Promise.catch(fun x ->
-      console.log x
-    )
-    |> ignore
-
-    //console.log (db.Get<User>(1))
-
-    //db.Console()zdz

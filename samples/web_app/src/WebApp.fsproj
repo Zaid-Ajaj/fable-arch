@@ -60,8 +60,9 @@
     <Compile Include="Fable.Arch.RouteParser.fs" />
     <Compile Include="libs\Aether.fs" />
     <Compile Include="Herebris.SimpleDatabase.fs" />
-    <Compile Include="Database.fs" />
     <Compile Include="Common.fs" />
+    <Compile Include="Database.fs" />
+    <Compile Include="FakeApi.fs" />
     <Compile Include="Pages\Index.fs" />
     <Compile Include="Pages\About.fs" />
     <Compile Include="Pages\User\User_Index.fs" />

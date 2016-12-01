@@ -171,11 +171,15 @@ module Main =
 
   let routerF m = router.Route m.Message
 
-//  createApp Model.Initial view update Virtualdom.createRender
-//  |> withStartNodeSelector "#app"
-//  |> withProducer (routeProducer locationHandler router)
-//  |> withSubscriber (routeSubscriber locationHandler routerF)
-//  |> start
-//  |> ignore
-
-  Database.main()
+  createApp Model.Initial view update Virtualdom.createRender
+  |> withStartNodeSelector "#app"
+  |> withProducer (routeProducer locationHandler router)
+  |> withSubscriber (routeSubscriber locationHandler routerF)
+  |> start
+  |> ignore
+//
+//  Database.init()
+//
+//  FakeApi.Get<UserRecord list> (FakeApi.User FakeApi.Index) (fun x ->
+//    console.log x
+//  )
