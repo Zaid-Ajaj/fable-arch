@@ -58,6 +58,9 @@ module Index =
             th
               []
               [ text "Email" ]
+            th
+              [ attribute "colspan" "2" ]
+              []
           ]
       ]
 
@@ -76,6 +79,24 @@ module Index =
         td
           []
           [ text item.Email ]
+        td
+          [ classy "is-icon" ]
+          [ a
+              [ voidLinkAction<Actions> ]
+              [ i
+                  [ classy "fa fa-pencil" ]
+                  []
+              ]
+          ]
+        td
+          [ classy "is-icon" ]
+          [ a
+              [ voidLinkAction<Actions> ]
+              [ i
+                  [ classy "fa fa-eye" ]
+                  []
+              ]
+          ]
       ]
 
   let body users =

@@ -215,3 +215,12 @@ module Main =
   |> withSubscriber (routeSubscriber locationHandler routerF)
   |> start
   |> ignore
+
+  // Init location
+  // If hash is empty go to root
+  if location.hash = "" then
+    location.hash <- "/"
+  else
+    // Else trigger hashchange to navigate to current route
+    window.dispatchEvent(Event.Create("hashchange") ) |> ignore
+  |> ignore

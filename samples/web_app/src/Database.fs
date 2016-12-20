@@ -20,18 +20,21 @@ module Database =
           Age = 24
           Email = "john.doe@mail.com"
           Gender = Male
+          State = Active
         }
         { Firstname = "Jane"
           Surname = "Doe"
           Age = 27
           Email = "jane.doe@mail.com"
           Gender = Female
+          State = Active
         }
         { Firstname = "Barry"
           Surname = "Magium"
           Email = "barry.magium@mail.com"
           Age = 24
           Gender = Male
+          State = Inactive
         }
       ]
 

@@ -34,13 +34,17 @@ module Common =
   module Types =
 
     type Gender =
-    | Male
-    | Female
+      | Male
+      | Female
 
       override self.ToString () =
         match self with
         | Male -> "Mr."
         | Female -> "Mrs."
+
+    type State =
+      | Active
+      | Inactive
 
     type UserRecord =
       { Firstname: string
@@ -48,4 +52,5 @@ module Common =
         Age: int
         Email: string
         Gender: Gender
+        State: State
       }
