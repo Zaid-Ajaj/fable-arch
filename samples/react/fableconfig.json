@@ -1,0 +1,11 @@
+{
+    "projFile": "./hello.fsx",
+    "rollup": {
+        "dest": "./public/bundle.js",
+        "external": ["react", "react-dom"],
+        "globals": {
+            "react": "React",
+            "react-dom": "ReactDOM"
+        }
+    }
+}

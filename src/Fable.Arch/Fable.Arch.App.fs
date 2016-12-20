@@ -4,12 +4,13 @@ open Fable.Core
 open Fable.Core.JsInterop
 open System.Diagnostics
 
-open Fable.Import.Browser
 open Html
 
 [<AutoOpen>]
 module Types =
-    type ModelChanged<'TMessage, 'TModel> = 
+    type Handler<'TMessage> = 'TMessage -> unit
+
+    type ModelChanged<'TMessage, 'TModel> =
         {
             PreviousState: 'TModel
             Message: 'TMessage
@@ -20,130 +21,97 @@ module Types =
         | ModelChanged of ModelChanged<'TMessage, 'TModel>
         | ActionReceived of 'TMessage
         | Replayed of (System.Guid * 'TModel) list
-    
+
     type AppMessage<'TMessage, 'TModel> =
         | Message of 'TMessage
         | Replay of 'TModel*((System.Guid*'TMessage) list)
-        | Draw
 
-    type Action<'TMessage> = ('TMessage -> unit) -> unit
+    type Action<'TMessage> = Handler<'TMessage> -> unit
 
     type Subscriber<'TMessage, 'TModel> = AppEvent<'TMessage, 'TModel> -> unit
-    type Producer<'TMessage, 'TModel> = (AppMessage<'TMessage, 'TModel> -> unit) -> unit
+    type Producer<'TMessage, 'TModel> = Action<AppMessage<'TMessage, 'TModel>>
     type Plugin<'TMessage, 'TModel> =
         {
             Producer: Producer<'TMessage, 'TModel>
             Subscriber: Subscriber<'TMessage, 'TModel>
         }
 
-    type RenderState = 
-        | InProgress
-        | NoRequest
+    type Selector = string
 
-type ScheduleMessage = 
-    | PingIn of float*(unit -> unit)
+    type AppSpecification<'TModel, 'TMessage, 'TView> =
+        {
+            InitState: 'TModel
+            View: 'TModel -> 'TView
+            Update: 'TModel -> 'TMessage -> ('TModel * Action<'TMessage> list)
+            InitMessage: Action<'TMessage>
+            CreateRenderer: Selector -> Handler<'TMessage> -> 'TView -> (Handler<'TMessage> -> 'TView -> unit)
+            NodeSelector: Selector
+            Producers: Producer<'TMessage, 'TModel> list
+            Subscribers: Subscriber<'TMessage, 'TModel> list
+        }
 
-type Selector = string
-type Renderer<'TMessage, 'TView, 'TViewState> = 
-    {
-        Render: ('TMessage -> unit) -> 'TView -> 'TViewState -> 'TViewState
-        Init: Selector -> ('TMessage -> unit) -> 'TView -> 'TViewState
-    }
+    type App<'TModel, 'TMessage, 'TView> =
+        {
+            Model: 'TModel
+            Actions: (unit -> unit) list
+            Render: Handler<'TMessage> -> 'TView -> unit
+            Subscribers: Subscriber<'TMessage, 'TModel> list
+        }
 
-type AppSpecification<'TModel, 'TMessage, 'TView, 'TViewState> = 
-    {
-        InitState: 'TModel
-        View: 'TModel -> 'TView
-        Update: 'TModel -> 'TMessage -> ('TModel * Action<'TMessage> list)
-        InitMessage: (('TMessage -> unit) -> unit)
-        Renderer: Renderer<'TMessage, 'TView, 'TViewState>
-        NodeSelector: Selector
-        Producers: Producer<'TMessage, 'TModel> list
-        Subscribers: Subscriber<'TMessage, 'TModel> list
-    }
+    let application<'TMessage, 'TModel, 'TView> initMessage handleMessage handleReplay configureProducers createInitApp =
+        let mutable state = None
 
-type App<'TModel, 'TMessage, 'TViewState> =
-    {
-        Model: 'TModel
-        Actions: Action<'TMessage> list
-        ViewState: 'TViewState
-        RenderState: RenderState
-    }
+        let notifySubs msg =
+            match state with
+            | Some s ->
+                s.Subscribers |> List.iter (fun sub -> sub msg)
+            | None -> ()
 
-[<AutoOpen>]
-module internal Helpers = 
-    let createScheduler() = 
-        MailboxProcessor.Start(fun inbox ->
-            let rec loop() = 
-                async {
-                    let! message = inbox.Receive()
-                    match message with
-                    | PingIn (milliseconds, cb) ->
-                        window.setTimeout(cb, milliseconds) |> ignore
-                        return! loop()
-                }
-            loop()
-        )
-
-    let application handleMessage handleDraw handleReplay configureProducers createInitApp (inbox:MailboxProcessor<AppMessage<'TMessage, 'TModel>>) =
-        let scheduler = createScheduler()
-        let scheduleDraw() = scheduler.Post(PingIn(1000./60., (fun() -> inbox.Post(Draw))))
-        let post msg = inbox.Post(msg)
-        let postMessage = Message >> post
-        configureProducers post
-        let rec inner state =
-            async {
-                let! msg = inbox.Receive()
-                match msg with
-                | Message message -> 
-                    return! inner (handleMessage scheduleDraw post message state)
-                | Draw -> 
-                    return! inner (handleDraw postMessage state)
+        let rec handleEvent (evt:AppMessage<'TMessage, 'TModel>) =
+            let (state', actions)  : App<'TModel, 'TMessage, 'TView>*(unit -> unit) list =
+                match evt with
+                | Message message ->
+                    handleMessage handleEvent notifySubs message (state |> Option.get)
                 | Replay (model, messages) ->
-                    return! inner (handleReplay postMessage (model, messages) state)
-            }
-        inner (createInitApp postMessage)
+                    handleReplay handleEvent notifySubs (model, messages) (state |> Option.get)
+            state <- Some state'
+            actions |> List.iter (fun x -> x())
 
-    let render post viewFn renderer app =
+        let post = (Message >> handleEvent)
+        state <- createInitApp post |> Some
+        initMessage post
+
+        configureProducers handleEvent
+        handleEvent
+
+    let render post viewFn app =
         let view = viewFn app.Model
-        let viewState' = renderer.Render post view app.ViewState
-        {app with ViewState = viewState'}
+        app.Render (Message >> post) view
+        app
 
-    let executeActions post = List.iter (fun a -> a (Message >> post))
-    let notifySubscribers subscribers msg = 
-        subscribers |> List.iter (fun s -> msg |> s)
+    let createActions post = List.map (fun a -> fun () -> a (Message >> post))
 
-    let requestDraw scheduleDraw = 
-        function
-        | NoRequest -> 
-            scheduleDraw()
-            InProgress
-        | InProgress -> InProgress
-    
-    let handleMessage update subscribers scheduleDraw post message app =
-        notifySubscribers subscribers (ActionReceived message)
+    let handleMessage update viewFn post notifySubs message app =
+        notifySubs (ActionReceived message)
         let (model, actions) = update app.Model message
 
-        let modelChanged = 
+        let modelChanged =
             ModelChanged {
                 CurrentState = model
                 PreviousState = app.Model
                 Message = message
             }
-        let renderState = requestDraw scheduleDraw app.RenderState
-        
-        executeActions post actions
-        notifySubscribers subscribers modelChanged
 
-        {app with Model = model; RenderState = renderState}
+        let actions = createActions post actions
+        let app' =
+            {app with Model = model}
+            |> render post viewFn
 
-    let handleDraw viewFn renderer post app = 
-        render post viewFn renderer app
-        |> (fun s -> {s with RenderState = NoRequest})
+        app', (fun () -> (notifySubs modelChanged))::actions
 
-    let calculateModelChanges initState update actions = 
+    let calculateModelChanges initState update actions =
         let execUpdate r a =
-            let m = 
+            let m =
                 match r with
                 | [] -> initState
                 | x::_ -> x |> snd
@@ -155,36 +123,47 @@ module internal Helpers =
         actions
         |> List.fold (fun s a -> (execUpdate s a)::s) []
 
-    let handleReplay viewFn updateFn renderer subscribers post (fromModel, actions) app = 
+    let handleReplay viewFn updateFn post notifySubs (fromModel, actions) app =
         let result = calculateModelChanges fromModel updateFn actions
-        let model = 
-            match result with 
+        let model =
+            match result with
             | m::_ -> m |> snd
             | [] -> fromModel
-        let app' = 
+        let app' =
             {app with Model = model}
-            |> render post viewFn renderer
+            |> render post viewFn
 
-        (Replayed result) |> notifySubscribers subscribers
-        app'
+        app', [fun () -> (Replayed result) |> notifySubs]
 
 [<AutoOpen>]
-module AppApi = 
+module AppApi =
     // Helper functions to map from one action type to another
-    let mapAction<'T1,'T2> (mapping:'T1 -> 'T2) (action:Action<'T1>) : Action<'T2> = 
-        fun x -> action (mapping >> x)  
+    let mapAction<'T1,'T2> (mapping:'T1 -> 'T2) (action:Action<'T1>) : Action<'T2> =
+        fun x -> action (mapping >> x)
+
+    let mapAppMessage map = function
+        | AppMessage.Message msg -> AppMessage.Message (map msg)
+        | Replay (x,messageList) -> Replay (x,messageList |> List.map (fun (id, m) -> id, map m))
+
+    let mapProducer map p = mapAction map p
+
+    let mapSubscriber mapModelChanged mapAction sub = function
+        | ModelChanged mc ->
+            mc |> mapModelChanged |> Option.map ModelChanged |> Option.iter sub
+        | ActionReceived m -> mapAction id m |> Option.map ActionReceived |> Option.iter sub
+        | Replayed lst -> sub (Replayed lst)
 
     let mapActions m = List.map (mapAction m)
     let toActionList a = [a]
 
     // Starting point for creating an application
-    let createApp state view update renderer =
+    let createApp state view update createRenderer =
         {
             InitState = state
             View = view
             Update = update
             InitMessage = (fun _ -> ())
-            Renderer = renderer
+            CreateRenderer = createRenderer
             NodeSelector = "body"
             Producers = []
             Subscribers = []
@@ -198,48 +177,43 @@ module AppApi =
     let withStartNodeSelector selector app = { app with NodeSelector = selector }
     let withInitMessage msg app = { app with InitMessage = msg }
 
-    let private withInstrumentationProducer p app = 
+    let private withInstrumentationProducer p app =
         {app with Producers = p::app.Producers}
     let withProducer (producer:('a->unit)->unit) app =
-        let lift h = Message >> h 
+        let lift h = Message >> h
         let producer' = lift >> producer
         withInstrumentationProducer producer' app
 
     let withInstrumentationSubscriber subscriber app =
-        {app with Subscribers = subscriber::app.Subscribers}
-    let withSubscriber (subscriber:ModelChanged<'a,'b> -> unit) app = 
-        let subscriber' = function 
+        {app with AppSpecification.Subscribers = subscriber::app.Subscribers}
+    let withSubscriber (subscriber:ModelChanged<'a,'b> -> unit) app =
+        let subscriber' = function
             | ModelChanged m -> m |> subscriber
             | _ -> ()
         withInstrumentationSubscriber subscriber' app
-        
+
     let withPlugin plugin =
         (withInstrumentationSubscriber plugin.Subscriber)
         >> (withInstrumentationProducer plugin.Producer)
 
     let configureProducers producers post =
-        producers |> List.iter (fun p -> p post) 
+        producers |> List.iter (fun p -> p post)
 
     // Start the application
-    let start appSpec =
-        let renderer = appSpec.Renderer
-        let viewFn = appSpec.View
+    let start (appSpec:AppSpecification<'TModel, 'TMessage, 'TView>) =
+        let viewFn : ('TModel -> 'TView) = appSpec.View
         let updateFn = appSpec.Update
 
-        let createInitApp post = 
-            let view = viewFn appSpec.InitState
-            let viewState = renderer.Init appSpec.NodeSelector post view
-            appSpec.InitMessage post
-            let render = appSpec.Renderer.Render
-
+        let createInitApp post =
+            let view : 'TView = viewFn appSpec.InitState
+            let render = appSpec.CreateRenderer appSpec.NodeSelector post view
             {
                 Model = appSpec.InitState
-                ViewState = viewState
-                RenderState = NoRequest
+                Render = render
+                Subscribers = appSpec.Subscribers
                 Actions = []
-            }
-        let handleMessage' = handleMessage updateFn appSpec.Subscribers
-        let handleDraw' = handleDraw viewFn renderer
-        let handleReplay' = handleReplay viewFn updateFn renderer appSpec.Subscribers
+            } : App<'TModel, 'TMessage, 'TView>
+        let handleMessage' = handleMessage updateFn viewFn
+        let handleReplay' = handleReplay viewFn updateFn
         let configureProducers' = configureProducers appSpec.Producers
-        MailboxProcessor.Start(application handleMessage' handleDraw' handleReplay' configureProducers' createInitApp)
+        application appSpec.InitMessage handleMessage' handleReplay' configureProducers' createInitApp

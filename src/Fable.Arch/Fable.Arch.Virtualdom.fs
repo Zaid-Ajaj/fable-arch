@@ -46,10 +46,17 @@ let createTree<'T> (handler:'T -> unit) tag (attributes:Attribute<'T> list) chil
     let elem = h(tag, toAttrs attributes, List.toArray children)
     elem
 
+type RenderState = 
+    | NoRequest
+    | PendingRequest
+    | ExtraRequest
+
 type ViewState<'TMessage> = 
     {
         CurrentTree: obj
+        NextTree: obj
         Node: Node 
+        RenderState: RenderState
     }
 
 let rec renderSomething handler node = 
@@ -60,29 +67,47 @@ let rec renderSomething handler node =
     | Text str -> box(string str)
     | WhiteSpace str -> box(string str)
 
-
 let render handler view viewState =
     let tree = renderSomething handler view
-    {viewState with CurrentTree = tree}
+    {viewState with NextTree = tree}
 
-let init selector handler view = 
+let createRender selector handler view =
     let node = document.body.querySelector(selector) :?> HTMLElement
     let tree = renderSomething handler view
     let vdomNode = createElement tree
     node.appendChild(vdomNode) |> ignore
-    {
-        CurrentTree = tree
-        Node = vdomNode
-    }    
+    let mutable viewState = 
+        {
+            CurrentTree = tree
+            NextTree = tree
+            Node = vdomNode
+            RenderState = NoRequest
+        }
 
-let render' handler view viewState = 
-    let viewState' = render handler view viewState
-    let patches = diff viewState.CurrentTree viewState'.CurrentTree
-    patch viewState.Node patches |> ignore
-    viewState'
+    let raf cb = 
+        Fable.Import.Browser.window.requestAnimationFrame(fun fb -> cb())
 
-let renderer =
-    {
-        Render = render'
-        Init = init
-    }
+    let render' handler view = 
+        let viewState' = render handler view viewState
+        viewState <- viewState'
+
+        let rec callBack() = 
+            match viewState.RenderState with
+            | PendingRequest ->
+                raf callBack |> ignore
+                viewState <- {viewState with RenderState = ExtraRequest}
+
+                let patches = diff viewState.CurrentTree viewState.NextTree
+                patch viewState.Node patches |> ignore
+                viewState <- {viewState with CurrentTree = viewState.NextTree}
+            | ExtraRequest -> 
+                viewState <- {viewState with RenderState = NoRequest}
+            | NoRequest -> raise (exn "Shouldn't happen")
+        
+        match viewState.RenderState with
+        | NoRequest ->
+            raf callBack |> ignore
+        | _ -> ()
+        viewState <- {viewState with RenderState = PendingRequest}
+
+    render'
