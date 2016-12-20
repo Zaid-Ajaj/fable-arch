@@ -32,9 +32,15 @@ module Common =
 
   [<AutoOpen>]
   module Types =
+
     type Gender =
     | Male
     | Female
+
+      override self.ToString () =
+        match self with
+        | Male -> "Mr."
+        | Female -> "Mrs."
 
     type UserRecord =
       { Firstname: string

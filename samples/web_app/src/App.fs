@@ -103,7 +103,15 @@ module Main =
             |> Optic.set (Model.SubModels_ >-> SubModels.Menu_ >-> Menu.Model.CurrentPage_) route
             |> Optic.set (Model.SubModels_ >-> SubModels.Navbar_ >-> Navbar.Model.CurrentPage_) route
             |> Optic.set (Model.CurrentPage_) route
-          m', []
+
+          let message =
+            match subRoute with
+            | UserApi.Route.Index ->
+              [ fun h ->
+                  h (UserDispatcherAction (Pages.User.Dispatcher.Actions.IndexActions Pages.User.Index.Actions.Init))
+              ]
+            | _ -> []
+          m', message
     | IndexActions act ->
         let (res, action) = Pages.Index.update model.SubModels.Index.Value act
         let action' = mapActions IndexActions action
@@ -149,7 +157,12 @@ module Main =
       [ div
           [ classy "container" ]
           [ navbarHtml
-            pageHtml
+            div
+              [ classy "columns content" ]
+              [ div
+                  [ classy "column is-10 is-offset-1" ]
+                  [ pageHtml ]
+              ]
           ]
         menuHtml
       ]
@@ -193,15 +206,12 @@ module Main =
 
   let routerF m = router.Route m.Message
 
+  // Ensure database creation
+  WebApp.Database.init ()
+
   createApp Model.Initial view update Virtualdom.createRender
   |> withStartNodeSelector "#app"
   |> withProducer (routeProducer locationHandler router)
   |> withSubscriber (routeSubscriber locationHandler routerF)
   |> start
   |> ignore
-//
-//  Database.init()
-//
-//  FakeApi.Get<UserRecord list> (FakeApi.User FakeApi.Index) (fun x ->
-//    console.log x
-//  )
