@@ -1,13 +1,20 @@
-.header {
+/*.header {
   line-height: 1.6em;
   background: #202020;
 }
 
 .pure-menu-selected .pure-menu-link {
-  color: #fff;
+  color: #fff !important;
 }
 
 .pure-menu-active > .pure-menu-link, .pure-menu-link:hover, .pure-menu-link:focus {
     background-color: #eee;
     color: #000;
+}*/
+
+.menu-left {
+  position: fixed;
+  width: 150px;
+  margin-top: 100px;
+  margin-left: 10px;
 }

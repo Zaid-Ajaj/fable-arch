@@ -19,14 +19,16 @@ open WebApp.Common
 module Main =
 
   type SubModels =
-    { Menu: Menu.Model
+    { Navbar: Navbar.Model
+      Menu: Menu.Model
       Index: Pages.Index.Model option
       About: Pages.About.Model option
       User: Pages.User.Dispatcher.Model option
     }
 
     static member Initial =
-      { Menu = Menu.Model.Initial(Index)
+      { Navbar = Navbar.Model.Initial(Index)
+        Menu = Menu.Model.Initial(Index)
         Index = None
         About = None
         User = None
@@ -40,6 +42,9 @@ module Main =
 
     static member User_ =
       (fun r -> r.User), (fun v r -> { r with User = Some v } )
+
+    static member Navbar_ =
+      (fun r -> r.Navbar), (fun v r -> { r with Navbar = v } )
 
     static member Menu_ =
       (fun r -> r.Menu), (fun v r -> { r with Menu = v } )
@@ -68,6 +73,7 @@ module Main =
     | AboutActions of Pages.About.Actions
     | UserDispatcherAction of Pages.User.Dispatcher.Actions
     | MenuActions of Menu.Actions
+    | NavbarActions of Navbar.Actions
 
 
   let update model action =
@@ -79,6 +85,7 @@ module Main =
             model
             |> Optic.set (Model.SubModels_ >-> SubModels.Index_) Pages.Index.Model.Initial
             |> Optic.set (Model.SubModels_ >-> SubModels.Menu_ >-> Menu.Model.CurrentPage_) route
+            |> Optic.set (Model.SubModels_ >-> SubModels.Navbar_ >-> Navbar.Model.CurrentPage_) route
             |> Optic.set (Model.CurrentPage_) route
           m', []
       | About ->
@@ -86,6 +93,7 @@ module Main =
             model
             |> Optic.set (Model.SubModels_ >-> SubModels.About_) Pages.About.Model.Initial
             |> Optic.set (Model.SubModels_ >-> SubModels.Menu_ >-> Menu.Model.CurrentPage_) route
+            |> Optic.set (Model.SubModels_ >-> SubModels.Navbar_ >-> Navbar.Model.CurrentPage_) route
             |> Optic.set (Model.CurrentPage_) route
           m', []
       | User subRoute ->
@@ -93,6 +101,7 @@ module Main =
             model
             |> Optic.set (Model.SubModels_ >-> SubModels.User_) (Pages.User.Dispatcher.Model.Initial(subRoute))
             |> Optic.set (Model.SubModels_ >-> SubModels.Menu_ >-> Menu.Model.CurrentPage_) route
+            |> Optic.set (Model.SubModels_ >-> SubModels.Navbar_ >-> Navbar.Model.CurrentPage_) route
             |> Optic.set (Model.CurrentPage_) route
           m', []
     | IndexActions act ->
@@ -115,6 +124,11 @@ module Main =
         let action' = mapActions MenuActions action
         let m' = Optic.set (Model.SubModels_ >-> SubModels.Menu_) res model
         m', action'
+    | NavbarActions act ->
+        let (res, action) = Navbar.update model.SubModels.Navbar act
+        let action' = mapActions NavbarActions action
+        let m' = Optic.set (Model.SubModels_ >-> SubModels.Navbar_) res model
+        m', action'
     | NoOp -> model, []
 
   let view model =
@@ -124,14 +138,22 @@ module Main =
       | About -> Html.map AboutActions (Pages.About.view model.SubModels.About.Value)
       | User subRoute -> Html.map UserDispatcherAction (Pages.User.Dispatcher.view model.SubModels.User.Value subRoute)
 
+    let navbarHtml =
+      Html.map NavbarActions (Navbar.view model.SubModels.Navbar)
+
     let menuHtml =
       Html.map MenuActions (Menu.view model.SubModels.Menu)
 
     div
       []
-      [ menuHtml
-        pageHtml
+      [ div
+          [ classy "container" ]
+          [ navbarHtml
+            pageHtml
+          ]
+        menuHtml
       ]
+
 
 
   let routes =
