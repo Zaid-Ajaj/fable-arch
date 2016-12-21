@@ -6,7 +6,6 @@ open System
 
 open Herebris.SimpleDatabase
 open Fable.Core.JsInterop
-open Fable.PowerPack
 open WebApp.Common
 
 module Database =
