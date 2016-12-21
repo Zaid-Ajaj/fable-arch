@@ -158,13 +158,16 @@ module Main =
           [ classy "container" ]
           [ navbarHtml
             div
-              [ classy "columns content" ]
+              [ classy "columns app-body" ]
               [ div
-                  [ classy "column is-10 is-offset-1" ]
+                  [ classy "column is-2" ]
+                  [ menuHtml
+                  ]
+                div
+                  [ classy "column is-9 is-offset-1" ]
                   [ pageHtml ]
               ]
           ]
-        menuHtml
       ]
 
 

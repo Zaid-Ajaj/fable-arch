@@ -79,7 +79,7 @@ module Menu =
 
   let view model =
     aside
-      [ classy "menu menu-left" ]
+      [ classy "menu" ]
       [ menuSection "Users"
         menuList
           [ MenuLink.Create("Index", (Route.User UserApi.Index))
