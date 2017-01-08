@@ -20,28 +20,38 @@ module Main =
 
   type SubModels =
     { Navbar: Navbar.Model
+      Header: Header.Model
       Menu: Menu.Model
       Index: Pages.Index.Model option
       About: Pages.About.Model option
       User: Pages.User.Dispatcher.Model option
+      Docs: Pages.Docs.Dispatcher.Model option
     }
 
     static member Initial =
       { Navbar = Navbar.Model.Initial(Index)
+        Header = Header.Model.Initial(Index)
         Menu = Menu.Model.Initial(Index)
         Index = None
         About = None
         User = None
+        Docs = None
       }
 
     static member Index_ =
       (fun r -> r.Index), (fun v r -> { r with Index = Some v } )
+
+    static member Header_ =
+      (fun r -> r.Header), (fun v r -> { r with Header = v } )
 
     static member About_ =
       (fun r -> r.About), (fun v r -> { r with About = Some v } )
 
     static member User_ =
       (fun r -> r.User), (fun v r -> { r with User = Some v } )
+
+    static member Docs_ =
+      (fun r -> r.Docs), (fun v r -> { r with Docs = Some v } )
 
     static member Navbar_ =
       (fun r -> r.Navbar), (fun v r -> { r with Navbar = v } )
@@ -72,7 +82,9 @@ module Main =
     | IndexActions of Pages.Index.Actions
     | AboutActions of Pages.About.Actions
     | UserDispatcherAction of Pages.User.Dispatcher.Actions
+    | DocsDispatcherAction of Pages.Docs.Dispatcher.Actions
     | MenuActions of Menu.Actions
+    | HeaderActions of Header.Actions
     | NavbarActions of Navbar.Actions
 
 
@@ -84,6 +96,7 @@ module Main =
           let m' =
             model
             |> Optic.set (Model.SubModels_ >-> SubModels.Index_) Pages.Index.Model.Initial
+            |> Optic.set (Model.SubModels_ >-> SubModels.Header_ >-> Header.Model.CurrentPage_) route
             |> Optic.set (Model.SubModels_ >-> SubModels.Menu_ >-> Menu.Model.CurrentPage_) route
             |> Optic.set (Model.SubModels_ >-> SubModels.Navbar_ >-> Navbar.Model.CurrentPage_) route
             |> Optic.set (Model.CurrentPage_) route
@@ -92,14 +105,26 @@ module Main =
           let m' =
             model
             |> Optic.set (Model.SubModels_ >-> SubModels.About_) Pages.About.Model.Initial
+            |> Optic.set (Model.SubModels_ >-> SubModels.Header_ >-> Header.Model.CurrentPage_) route
             |> Optic.set (Model.SubModels_ >-> SubModels.Menu_ >-> Menu.Model.CurrentPage_) route
             |> Optic.set (Model.SubModels_ >-> SubModels.Navbar_ >-> Navbar.Model.CurrentPage_) route
             |> Optic.set (Model.CurrentPage_) route
+          m', []
+      | Docs subRoute ->
+          let m' =
+            model
+            |> Optic.set (Model.SubModels_ >-> SubModels.Docs_) (Pages.Docs.Dispatcher.Model.Initial(subRoute))
+            |> Optic.set (Model.SubModels_ >-> SubModels.Header_ >-> Header.Model.CurrentPage_) route
+            |> Optic.set (Model.SubModels_ >-> SubModels.Menu_ >-> Menu.Model.CurrentPage_) route
+            |> Optic.set (Model.SubModels_ >-> SubModels.Navbar_ >-> Navbar.Model.CurrentPage_) route
+            |> Optic.set (Model.CurrentPage_) route
+
           m', []
       | User subRoute ->
           let m' =
             model
             |> Optic.set (Model.SubModels_ >-> SubModels.User_) (Pages.User.Dispatcher.Model.Initial(subRoute))
+            |> Optic.set (Model.SubModels_ >-> SubModels.Header_ >-> Header.Model.CurrentPage_) route
             |> Optic.set (Model.SubModels_ >-> SubModels.Menu_ >-> Menu.Model.CurrentPage_) route
             |> Optic.set (Model.SubModels_ >-> SubModels.Navbar_ >-> Navbar.Model.CurrentPage_) route
             |> Optic.set (Model.CurrentPage_) route
@@ -127,6 +152,11 @@ module Main =
         let action' = mapActions UserDispatcherAction action
         let m' = Optic.set (Model.SubModels_ >-> SubModels.User_) res model
         m', action'
+    | DocsDispatcherAction act ->
+        let (res, action) = Pages.Docs.Dispatcher.update model.SubModels.Docs.Value act
+        let action' = mapActions DocsDispatcherAction action
+        let m' = Optic.set (Model.SubModels_ >-> SubModels.Docs_) res model
+        m', action'
     | MenuActions act ->
         let (res, action) = Menu.update model.SubModels.Menu act
         let action' = mapActions MenuActions action
@@ -137,12 +167,18 @@ module Main =
         let action' = mapActions NavbarActions action
         let m' = Optic.set (Model.SubModels_ >-> SubModels.Navbar_) res model
         m', action'
+    | HeaderActions act ->
+        let (res, action) = Header.update model.SubModels.Header act
+        let action' = mapActions HeaderActions action
+        let m' = Optic.set (Model.SubModels_ >-> SubModels.Header_) res model
+        m', action'
     | NoOp -> model, []
 
   let view model =
     let pageHtml =
       match model.CurrentPage with
       | Index -> Html.map IndexActions (Pages.Index.view model.SubModels.Index.Value)
+      | Docs subRoute -> Html.map DocsDispatcherAction (Pages.Docs.Dispatcher.view model.SubModels.Docs.Value subRoute)
       | About -> Html.map AboutActions (Pages.About.view model.SubModels.About.Value)
       | User subRoute -> Html.map UserDispatcherAction (Pages.User.Dispatcher.view model.SubModels.User.Value subRoute)
 
@@ -152,29 +188,30 @@ module Main =
     let menuHtml =
       Html.map MenuActions (Menu.view model.SubModels.Menu)
 
+    let headerHtml =
+      Html.map HeaderActions (Header.view model.SubModels.Header)
+
     div
       []
       [ div
           [ classy "container" ]
           [ navbarHtml
-            div
-              [ classy "columns app-body" ]
-              [ div
-                  [ classy "column is-2" ]
-                  [ menuHtml
-                  ]
-                div
-                  [ classy "column is-9 is-offset-1" ]
-                  [ pageHtml ]
-              ]
+          ]
+        headerHtml
+        div
+          [ classy "section" ]
+          [ div
+              [ classy "container" ]
+              [ pageHtml ]
           ]
       ]
-
 
 
   let routes =
     [
       runM (NavigateTo Index) (pStaticStr "/" |> (drop >> _end))
+      runM (NavigateTo (Docs DocsApi.Index)) (pStaticStr "/docs" |> (drop >> _end))
+      runM (NavigateTo (Docs DocsApi.HMR)) (pStaticStr "/docs/hmr" |> (drop >> _end))
       runM (NavigateTo About) (pStaticStr "/about" |> (drop >> _end))
       runM (NavigateTo (User UserApi.Index)) (pStaticStr "/users" |> (drop >> _end))
       runM (NavigateTo (User UserApi.Create)) (pStaticStr "/user/create" |> (drop >> _end))

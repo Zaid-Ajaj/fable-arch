@@ -105,7 +105,7 @@ module Navbar =
       [ div
           [ classy "nav-left" ]
           [ h1
-              [ classy "nav-item is-brand"
+              [ classy "nav-item is-brand title is-4"
                 voidLinkAction<Actions>
               ]
               [ text "Fable-Arch"

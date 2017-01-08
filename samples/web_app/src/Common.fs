@@ -12,14 +12,25 @@ module Common =
       | Edit of int
       | Show of int
 
+  [<RequireQualifiedAccess>]
+  module DocsApi =
+    type Route
+      = Index
+      | HMR
+
   type Route
     = Index
+    | Docs of DocsApi.Route
     | User of UserApi.Route
     | About
 
   let resolveRoutesToUrl r =
     match r with
       | Index -> Some "/"
+      | Docs api ->
+        match api with
+        | DocsApi.Index -> Some "/docs"
+        | DocsApi.HMR -> Some "/docs/hmr"
       | About -> Some "/about"
       | User api ->
         match api with
@@ -100,7 +111,7 @@ module Common =
       open Fable.Core.JsInterop
 
       let onInput x = onEvent "oninput" (fun e -> x (unbox e?target?value))
-      
+
       let controlLabel (info: Types.LabelInfo) =
         label
             [ classy "label"
@@ -125,4 +136,4 @@ module Common =
                   ]
               ]
           ]
-      
+
