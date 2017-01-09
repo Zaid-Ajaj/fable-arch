@@ -10,47 +10,50 @@ open Fable.Arch.Html
 open WebApp.Common
 open WebApp
 
+open System
+
 module Clock =
 
-  type Model =
-    { Content: string
-    }
-
-    static member Initial =
-      { Content = ""
-      }
+  /// Make sure that number have a minimal representation of 2 digits
+  let normalizeNumber x =
+      if x < 10 then
+          sprintf "0%i" x
+      else
+          string x
 
   type Actions =
-    | NoOp
-    | Init
-    | SetContent of string
-    | NavigateTo of Route
+      | Tick of DateTime
 
+  /// A really simple type to Store our ModelChanged
+  type Model =
+      { Time: string      // Time: HH:mm:ss
+        Date: string }    // Date: YYYY/MM/DD
+
+      /// Static member giving back an init Model
+      static member Initial =
+          { Time = "00:00:00"
+            Date = "1970/01/01" }
+
+  /// Handle all the update of our Application
   let update model action =
-    match action with
-    | NoOp ->
-        model, []
-    | Init ->
-        let message =
-          [ fun h ->
-              ()
-          ]
-        model, message
-    | SetContent content ->
-        { model with Content = content }, []
-    | NavigateTo route ->
-      let message =
-        [ fun h ->
-            let url = resolveRoutesToUrl route
-            match url with
-            | Some u -> location.hash <- u
-            | None -> failwith "Cannot be reached. Route should always be resolve"
-        ]
-      model, message
+      let model', action' =
+          match action with
+          /// Tick are push by the producer
+          | Tick datetime ->
+              // Normalize the day and month to ensure a 2 digit representation
+              let day = datetime.Day |> normalizeNumber
+              let month = datetime.Month |> normalizeNumber
+              // Create our date string
+              let date = sprintf "%i/%s/%s" datetime.Year month day
+              { model with
+                  Time = String.Format("{0:HH:mm:ss}", datetime)
+                  Date = date }, []
+      model', action'
 
+  /// Our application view
   let view model =
-    div
-      []
-      [ text "Sample index page"
-      ]
-
+      div
+          []
+          [ text model.Date
+            br []
+            text model.Time]

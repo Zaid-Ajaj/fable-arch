@@ -16,6 +16,8 @@ open Aether.Operators
 open WebApp
 open WebApp.Common
 
+open System
+
 module Main =
 
   type SubModels =
@@ -174,10 +176,15 @@ module Main =
         let m' = Optic.set (Model.SubModels_ >-> SubModels.Docs_) res model
         m', action'
     | SampleDispatcherAction act ->
-        let (res, action) = Pages.Sample.Dispatcher.update model.SubModels.Sample.Value act
-        let action' = mapActions SampleDispatcherAction action
-        let m' = Optic.set (Model.SubModels_ >-> SubModels.Sample_) res model
-        m', action'
+        // We need to protect from undefined model here
+        // This can occured because we are using a producer to Tick the clock sample every seconds
+        if model.SubModels.Sample.IsSome then
+          let (res, action) = Pages.Sample.Dispatcher.update model.SubModels.Sample.Value act
+          let action' = mapActions SampleDispatcherAction action
+          let m' = Optic.set (Model.SubModels_ >-> SubModels.Sample_) res model
+          m', action'
+        else
+          model, []
     | MenuActions act ->
         let (res, action) = Menu.update model.SubModels.Menu act
         let action' = mapActions MenuActions action
@@ -265,12 +272,24 @@ module Main =
 
   let routerF m = router.Route m.Message
 
+  let tickProducer push =
+    window.setInterval((fun _ ->
+        push(SampleDispatcherAction (Pages.Sample.Dispatcher.ClockActions (Pages.Sample.Clock.Tick DateTime.Now)))
+        null
+    ),
+        1000) |> ignore
+    // Force the first to push to have immediate effect
+    // If we don't do that there is one second before the first push
+    // and the view is rendered with the Model.init values
+    push(SampleDispatcherAction (Pages.Sample.Dispatcher.ClockActions (Pages.Sample.Clock.Tick DateTime.Now)))
+
   // Ensure database creation
   WebApp.Database.init ()
 
   createApp Model.Initial view update Virtualdom.createRender
   |> withStartNodeSelector "#app"
   |> withProducer (routeProducer locationHandler router)
+  |> withProducer tickProducer
   |> withSubscriber (routeSubscriber locationHandler routerF)
   |> start
   |> ignore
