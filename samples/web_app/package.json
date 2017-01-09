@@ -5,7 +5,7 @@
   "scripts": {
     "build": "node build.js",
     "dev": "concurrently \"npm run serve\" \"npm run watch\"",
-    "serve": "http-server . -c-1 -s",
+    "serve": "http-server -c-1 -s",
     "setup": "node setup.js",
     "watch": "node build.js watch"
   },

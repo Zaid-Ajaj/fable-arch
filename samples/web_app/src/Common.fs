@@ -18,10 +18,17 @@ module Common =
       = Index
       | HMR
 
+  [<RequireQualifiedAccess>]
+  module SampleApi =
+    type Route
+      = Clock
+      | Counter
+
   type Route
     = Index
     | Docs of DocsApi.Route
     | User of UserApi.Route
+    | Sample of SampleApi.Route
     | About
 
   let resolveRoutesToUrl r =
@@ -31,6 +38,10 @@ module Common =
         match api with
         | DocsApi.Index -> Some "/docs"
         | DocsApi.HMR -> Some "/docs/hmr"
+      | Sample api ->
+        match api with
+        | SampleApi.Clock -> Some "/sample/clock"
+        | SampleApi.Counter -> Some "/sample/counter"
       | About -> Some "/about"
       | User api ->
         match api with

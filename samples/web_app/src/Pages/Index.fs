@@ -14,9 +14,6 @@ open WebApp.Common
 
 module Index =
 
-//  [<Emit("marked($0)")>]
-//  let marked(s: string) : string = jsNative
-
   type Model =
     { Value: int
     }
@@ -39,6 +36,7 @@ module Index =
 # Fable-arch samples
 
 Fable-arch is a set of tools for building modern web applications inspired by the [elm architecture](http://guide.elm-lang.org/architecture/index.html).
+
 It is implemented around a set of abstractions which makes it possible to implement custom renderers if there is a need.
 Fable-arch comes with a HTML Dsl and a renderer built on top of [virtual-dom](https://github.com/Matt-Esch/virtual-dom) and all
 the samples here are using those two tools.
@@ -63,7 +61,14 @@ request [for the samples directory](https://github.com/fable-compiler/fable-arch
       "
 
     div
-      [ classy "content"
-        property "innerHTML" (Marked.Globals.marked.parse(index))
+      [ classy "section" ]
+      [ div
+          [ classy "container" ]
+          [ div
+              [ classy "content"
+                property "innerHTML" (Marked.Globals.marked.parse(index))
+              ]
+              []
+          ]
       ]
-      []
+

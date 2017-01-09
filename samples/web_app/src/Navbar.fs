@@ -111,10 +111,10 @@ module Navbar =
               [ text "Fable-Arch"
               ]
           ]
-        div
-          [ classy "nav-right nav-menu" ]
-          [ navItem (NavLink.Create("Home", Route.Index)) model.CurrentPage
-            navItem (NavLink.Create("About", Route.About)) model.CurrentPage
-          ]
+//        div
+//          [ classy "nav-right nav-menu" ]
+//          [ navItem (NavLink.Create("Home", Route.Index)) model.CurrentPage
+//            navItem (NavLink.Create("About", Route.About)) model.CurrentPage
+//          ]
         navButton
       ]

@@ -26,6 +26,7 @@ module Main =
       About: Pages.About.Model option
       User: Pages.User.Dispatcher.Model option
       Docs: Pages.Docs.Dispatcher.Model option
+      Sample: Pages.Sample.Dispatcher.Model option
     }
 
     static member Initial =
@@ -36,6 +37,7 @@ module Main =
         About = None
         User = None
         Docs = None
+        Sample = None
       }
 
     static member Index_ =
@@ -52,6 +54,9 @@ module Main =
 
     static member Docs_ =
       (fun r -> r.Docs), (fun v r -> { r with Docs = Some v } )
+
+    static member Sample_ =
+      (fun r -> r.Sample), (fun v r -> { r with Sample = Some v } )
 
     static member Navbar_ =
       (fun r -> r.Navbar), (fun v r -> { r with Navbar = v } )
@@ -83,6 +88,7 @@ module Main =
     | AboutActions of Pages.About.Actions
     | UserDispatcherAction of Pages.User.Dispatcher.Actions
     | DocsDispatcherAction of Pages.Docs.Dispatcher.Actions
+    | SampleDispatcherAction of Pages.Sample.Dispatcher.Actions
     | MenuActions of Menu.Actions
     | HeaderActions of Header.Actions
     | NavbarActions of Navbar.Actions
@@ -114,6 +120,16 @@ module Main =
           let m' =
             model
             |> Optic.set (Model.SubModels_ >-> SubModels.Docs_) (Pages.Docs.Dispatcher.Model.Initial(subRoute))
+            |> Optic.set (Model.SubModels_ >-> SubModels.Header_ >-> Header.Model.CurrentPage_) route
+            |> Optic.set (Model.SubModels_ >-> SubModels.Menu_ >-> Menu.Model.CurrentPage_) route
+            |> Optic.set (Model.SubModels_ >-> SubModels.Navbar_ >-> Navbar.Model.CurrentPage_) route
+            |> Optic.set (Model.CurrentPage_) route
+
+          m', []
+      | Sample subRoute ->
+          let m' =
+            model
+            |> Optic.set (Model.SubModels_ >-> SubModels.Sample_) (Pages.Sample.Dispatcher.Model.Initial(subRoute))
             |> Optic.set (Model.SubModels_ >-> SubModels.Header_ >-> Header.Model.CurrentPage_) route
             |> Optic.set (Model.SubModels_ >-> SubModels.Menu_ >-> Menu.Model.CurrentPage_) route
             |> Optic.set (Model.SubModels_ >-> SubModels.Navbar_ >-> Navbar.Model.CurrentPage_) route
@@ -157,6 +173,11 @@ module Main =
         let action' = mapActions DocsDispatcherAction action
         let m' = Optic.set (Model.SubModels_ >-> SubModels.Docs_) res model
         m', action'
+    | SampleDispatcherAction act ->
+        let (res, action) = Pages.Sample.Dispatcher.update model.SubModels.Sample.Value act
+        let action' = mapActions SampleDispatcherAction action
+        let m' = Optic.set (Model.SubModels_ >-> SubModels.Sample_) res model
+        m', action'
     | MenuActions act ->
         let (res, action) = Menu.update model.SubModels.Menu act
         let action' = mapActions MenuActions action
@@ -179,6 +200,7 @@ module Main =
       match model.CurrentPage with
       | Index -> Html.map IndexActions (Pages.Index.view model.SubModels.Index.Value)
       | Docs subRoute -> Html.map DocsDispatcherAction (Pages.Docs.Dispatcher.view model.SubModels.Docs.Value subRoute)
+      | Sample subRoute -> Html.map SampleDispatcherAction (Pages.Sample.Dispatcher.view model.SubModels.Sample.Value subRoute)
       | About -> Html.map AboutActions (Pages.About.view model.SubModels.About.Value)
       | User subRoute -> Html.map UserDispatcherAction (Pages.User.Dispatcher.view model.SubModels.User.Value subRoute)
 
@@ -198,12 +220,7 @@ module Main =
           [ navbarHtml
           ]
         headerHtml
-        div
-          [ classy "section" ]
-          [ div
-              [ classy "container" ]
-              [ pageHtml ]
-          ]
+        pageHtml
       ]
 
 
@@ -212,6 +229,8 @@ module Main =
       runM (NavigateTo Index) (pStaticStr "/" |> (drop >> _end))
       runM (NavigateTo (Docs DocsApi.Index)) (pStaticStr "/docs" |> (drop >> _end))
       runM (NavigateTo (Docs DocsApi.HMR)) (pStaticStr "/docs/hmr" |> (drop >> _end))
+      runM (NavigateTo (Sample SampleApi.Clock)) (pStaticStr "/sample/clock" |> (drop >> _end))
+      runM (NavigateTo (Sample SampleApi.Counter)) (pStaticStr "/sample/counter" |> (drop >> _end))
       runM (NavigateTo About) (pStaticStr "/about" |> (drop >> _end))
       runM (NavigateTo (User UserApi.Index)) (pStaticStr "/users" |> (drop >> _end))
       runM (NavigateTo (User UserApi.Create)) (pStaticStr "/user/create" |> (drop >> _end))
