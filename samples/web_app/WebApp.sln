@@ -7,12 +7,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "project", "project", "{BF60
 	ProjectSection(SolutionItems) = preProject
 		build.js = build.js
 		fableconfig.json = fableconfig.json
+		index.html = index.html
 		package.json = package.json
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "public", "public", "{541FC56F-446B-4E9A-8787-0CD71B88A16D}"
-	ProjectSection(SolutionItems) = preProject
-		public\index.html = public\index.html
 	EndProjectSection
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "WebApp", "src\WebApp.fsproj", "{861B39F3-785E-45AB-90B4-3CC720C1EC0B}"

@@ -872,6 +872,10 @@ fable-core@^0.7.19:
   version "0.7.19"
   resolved "https://registry.yarnpkg.com/fable-core/-/fable-core-0.7.19.tgz#13e7575e3d993472e34701ad12e25ae6ee01c966"
 
+fable-powerpack@^0.0.19:
+  version "0.0.19"
+  resolved "https://registry.yarnpkg.com/fable-powerpack/-/fable-powerpack-0.0.19.tgz#9349aab7d01958bf6936a76fefee06e1a7424294"
+
 feature-detect-es6@^1.3.1:
   version "1.3.1"
   resolved "https://registry.yarnpkg.com/feature-detect-es6/-/feature-detect-es6-1.3.1.tgz#f888736af9cb0c91f55663bfa4762eb96ee7047f"

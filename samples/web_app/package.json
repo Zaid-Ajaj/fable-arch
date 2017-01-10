@@ -5,7 +5,7 @@
   "scripts": {
     "build": "node build.js",
     "dev": "concurrently \"npm run serve\" \"npm run watch\"",
-    "serve": "http-server -c-1 -s",
+    "serve": "http-server . -c-1 -s",
     "setup": "node setup.js",
     "watch": "node build.js watch"
   },
@@ -13,6 +13,7 @@
     "babel-runtime": "^6.20.0",
     "concurrently": "^3.1.0",
     "fable-core": "^0.7.19",
+    "fable-powerpack": "^0.0.19",
     "virtual-dom": "^2.1.1"
   },
   "devDependencies": {

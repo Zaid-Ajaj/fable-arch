@@ -13,15 +13,18 @@ module Dispatcher =
 
   type Model =
     { Clock: Clock.Model option
+      Counter: Counter.Model option
     }
 
-    static member Generate (?index) =
+    static member Generate (?index, ?counter) =
       { Clock = index
+        Counter = counter
       }
 
     static member Initial (currentPage: SampleApi.Route) =
       match currentPage with
       | SampleApi.Clock -> Model.Generate (index = Clock.Model.Initial)
+      | SampleApi.Counter -> Model.Generate (counter = Counter.Model.Initial)
 
   type NavbarLink =
     { Text: string
@@ -35,6 +38,7 @@ module Dispatcher =
 
   type Actions
     = ClockActions of Clock.Actions
+    | CounterActions of Counter.Actions
     | NavigateTo of SampleApi.Route
 
   let update model action =
@@ -43,6 +47,10 @@ module Dispatcher =
         let (res, action) = Clock.update model.Clock.Value act
         let action' = mapActions ClockActions action
         { model with Clock = Some res}, action'
+    | CounterActions act ->
+        let (res, action) = Counter.update model.Counter.Value act
+        let action' = mapActions CounterActions action
+        { model with Counter = Some res}, action'
     | NavigateTo route ->
         let message =
           [ fun h ->
@@ -79,6 +87,8 @@ module Dispatcher =
       match subRoute with
       | SampleApi.Clock ->
           Html.map ClockActions (Clock.view model.Clock.Value)
+      | SampleApi.Counter ->
+          Html.map CounterActions (Counter.view model.Counter.Value)
 
     div
       []

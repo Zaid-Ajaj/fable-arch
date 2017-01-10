@@ -2,13 +2,12 @@
 
 open Fable.Core
 open Fable.Import
-open Fable.Import.Browser
 
 open Fable.Arch
-open Fable.Arch.App
 open Fable.Arch.Html
+open Fable.PowerPack
+open Fable.PowerPack.Fetch
 
-open WebApp.Common
 open WebApp
 
 open System
@@ -25,6 +24,7 @@ module Clock =
   type Actions =
       | Tick of DateTime
 
+  /// [BeginGroup:Model]
   /// A really simple type to Store our ModelChanged
   type Model =
       { Time: string      // Time: HH:mm:ss
@@ -33,7 +33,7 @@ module Clock =
       /// Static member giving back an init Model
       static member Initial =
           { Time = "00:00:00"
-            Date = "1970/01/01" }
+            Date = "01/01/1970" }
 
   /// Handle all the update of our Application
   let update model action =
@@ -50,39 +50,29 @@ module Clock =
                   Time = String.Format("{0:HH:mm:ss}", datetime)
                   Date = date }, []
       model', action'
+  /// [EndGroup]
 
   let sampleDemo model =
     div
-      [ classy "columns" ]
-      [ div
-          [ classy "column is-half is-offset-one-quarter has-text-centered" ]
-          [ div
-              [ classy "content" ]
-              [ h1
-                  [ classy "is-marginless" ]
-                  [ text (sprintf "%s %s" model.Date model.Time )]
-              ]
-          ]
+      [ classy "content" ]
+      [ h1
+          [ classy "is-marginless" ]
+          [ text (sprintf "%s %s" model.Date model.Time )]
       ]
 
-  let sampleText =
-    "
-```fs
-  /// Producer used to send the current Time every second
-  let tickProducer push =
-    window.setInterval((fun _ ->
-      push(Tick DateTime.Now)
-      null
-    ),
-    1000) |> ignore
-    // Force the first to push to have immediate effect
-    // If we don't do that there is one second before the first push
-    // and the view is rendered with the Model.init values
-    push(Tick DateTime.Now)
-```
-    "
+  let mutable docs = ""
 
-  open Fable.Core.JsInterop
+  fetch (DocGen.createSampleURL __SOURCE_FILE__) []
+  |> Promise.bind(fun res ->
+    res.text()
+  )
+  |> Promise.map(fun text ->
+    docs <-
+      DocGen.generateDocumentation text
+      |> Marked.Globals.marked.parse
+  )
+  |> ignore
+
 
   /// Our application view
   let view model =
@@ -95,10 +85,28 @@ module Clock =
               []
               [ text "Clock sample" ]
           ]
-        sampleDemo model
+        div
+          [ classy "columns" ]
+          [ div
+              [ classy "column is-half is-offset-one-quarter has-text-centered" ]
+              [ sampleDemo model ]
+          ]
         div
           [ classy "content"
-            property "innerHTML" (Marked.Globals.marked.parse(sampleText))
+            property "innerHTML" docs
           ]
           []
       ]
+
+  (*
+  [BeginDocs]
+
+  # ClockSample
+
+  This sample is a simple sample to show you how to use producers.
+  A producer, is used to push a message into your application from the outside world of the application.
+
+  In this sample, the producer is used to push a `Tick` actions every seconds.
+
+  [EndDocs]
+  *)
