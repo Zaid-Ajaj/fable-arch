@@ -52,7 +52,7 @@ module Marked =
       abstract silent: bool option with get, set
       abstract langPrefix: string option with get, set
       abstract smartypants: bool option with get, set
-      abstract highlight: code: string * lang: string * ?callback: Function -> string
+      abstract highlight: code: string * ?lang: string * ?callback: Function -> string
 
   type [<Erase>]Globals =
       [<Global>] static member marked : MarkedStatic = jsNative

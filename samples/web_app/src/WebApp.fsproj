@@ -56,6 +56,7 @@
   <ItemGroup>
     <Compile Include="libs\Aether.fs" />
     <Compile Include="libs\Fable.Import.Marked.fs" />
+    <Compile Include="libs\Fable.Import.HighlightJS.fs" />
     <Compile Include="Herebris.SimpleDatabase.fs" />
     <Compile Include="Common.fs" />
     <Compile Include="Database.fs" />
@@ -87,6 +88,7 @@
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
     </Reference>
+    <Reference Include="System" />
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.

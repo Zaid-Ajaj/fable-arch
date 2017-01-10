@@ -15,6 +15,10 @@
           "virtual-dom": [ "h", "create", "diff", "patch" ]
         }
       }
+    },
+    "external": [ "highlight.js" ],
+    "globals": {
+      "highlight.js": "hljs"
     }
   }
 }

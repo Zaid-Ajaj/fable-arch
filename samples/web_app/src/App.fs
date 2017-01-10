@@ -1,6 +1,8 @@
 namespace WebApp
 
 open Fable.Core
+open Fable.Core.JsInterop
+open Fable.Import
 open Fable.Import.Browser
 
 open Fable.Arch
@@ -301,4 +303,15 @@ module Main =
   else
     // Else trigger hashchange to navigate to current route
     window.dispatchEvent(Event.Create("hashchange") ) |> ignore
+  |> ignore
+
+
+  // Configure markdown parser and highlight
+
+  let options =
+    createObj [
+      "highlight" ==> fun code -> hljs.Globals.highlightAuto(code).value
+    ]
+
+  Marked.Globals.marked.setOptions(unbox options)
   |> ignore

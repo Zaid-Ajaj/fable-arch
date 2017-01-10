@@ -93,5 +93,7 @@ module Dispatcher =
                   subRoute
               ]
           ]
-        htmlContent
+        div
+          [ classy "container" ]
+          [ htmlContent ]
       ]

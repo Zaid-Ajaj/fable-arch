@@ -1,6 +1,7 @@
 ﻿namespace WebApp.Pages.Sample
 
 open Fable.Core
+open Fable.Import
 open Fable.Import.Browser
 
 open Fable.Arch
@@ -44,16 +45,60 @@ module Clock =
               let day = datetime.Day |> normalizeNumber
               let month = datetime.Month |> normalizeNumber
               // Create our date string
-              let date = sprintf "%i/%s/%s" datetime.Year month day
+              let date = sprintf "%s/%s/%i" month day datetime.Year
               { model with
                   Time = String.Format("{0:HH:mm:ss}", datetime)
                   Date = date }, []
       model', action'
 
+  let sampleDemo model =
+    div
+      [ classy "columns" ]
+      [ div
+          [ classy "column is-half is-offset-one-quarter has-text-centered" ]
+          [ div
+              [ classy "content" ]
+              [ h1
+                  [ classy "is-marginless" ]
+                  [ text (sprintf "%s %s" model.Date model.Time )]
+              ]
+          ]
+      ]
+
+  let sampleText =
+    "
+```fs
+  /// Producer used to send the current Time every second
+  let tickProducer push =
+    window.setInterval((fun _ ->
+      push(Tick DateTime.Now)
+      null
+    ),
+    1000) |> ignore
+    // Force the first to push to have immediate effect
+    // If we don't do that there is one second before the first push
+    // and the view is rendered with the Model.init values
+    push(Tick DateTime.Now)
+```
+    "
+
+  open Fable.Core.JsInterop
+
   /// Our application view
   let view model =
-      div
+
+    div
+      [ classy "section" ]
+      [ div
+          [ classy "content" ]
+          [ h1
+              []
+              [ text "Clock sample" ]
+          ]
+        sampleDemo model
+        div
+          [ classy "content"
+            property "innerHTML" (Marked.Globals.marked.parse(sampleText))
+          ]
           []
-          [ text model.Date
-            br []
-            text model.Time]
+      ]
