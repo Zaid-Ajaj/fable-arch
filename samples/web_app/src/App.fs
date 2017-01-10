@@ -311,6 +311,7 @@ module Main =
   let options =
     createObj [
       "highlight" ==> fun code -> hljs.Globals.highlightAuto(code).value
+      "langPrefix" ==> "hljs "
     ]
 
   Marked.Globals.marked.setOptions(unbox options)
