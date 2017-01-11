@@ -312,8 +312,7 @@ module Main =
   // Configure markdown parser
   let options =
     createObj [
-      //"highlight" ==> fun code -> hljs.Globals.highlightAuto(code).value
-      "highlight" ==> fun code -> console.log code; PrismJS.Globals.Prism.highlight(code, unbox prismFSharp)
+      "highlight" ==> fun code -> PrismJS.Globals.Prism.highlight(code, unbox prismFSharp)
       "langPrefix" ==> "language-"
     ]
 
