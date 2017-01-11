@@ -4,6 +4,8 @@ open Fable.Core
 open Fable.Import.Browser
 
 open System
+open System.Text.RegularExpressions
+open System.Collections.Generic
 
 module DocGen =
 
@@ -12,32 +14,31 @@ module DocGen =
   let createSampleURL file =
     sprintf "/%s/%s" sampleSourceDirectory file
 
-
-  type ContentGroup =
-    { Key: string
-      Value: string
-    }
-
-    static member Create (key, value)=
-      { Key = key
-        Value = value
-      }
-
   type CaptureState =
     | Nothing
     | Content
-    | Group of string
+    | Block of string
+
+  type Block =
+    { Key: string
+      Text: string
+    }
+
+    static member Create key content =
+      { Key = key
+        Text = content
+      }
 
   type ParserResult =
     { Text: string
-      Groups: ContentGroup list
+      Blocks: Block list
       CaptureState: CaptureState
       Offset: int
     }
 
     static member Initial =
       { Text = ""
-        Groups = []
+        Blocks = []
         CaptureState = Nothing
         Offset = 0
       }
@@ -51,6 +52,30 @@ module DocGen =
   let (|Prefix|_|) (p:string) (s:string) =
     if s.StartsWith(p) then
       Some s
+    else
+      None
+
+  let (|IsBeginBlock|_|) input =
+    let pattern = ".*\\[BeginBlock:([a-z0-9]*)\\]"
+    let m = Regex.Match(input, pattern, RegexOptions.IgnoreCase)
+    if (m.Success) then
+      Some m.Groups.[1].Value
+    else
+      None
+
+  let (|IsEndBlock|_|) input =
+    let pattern = ".*\\[EndBlock\\]"
+    let m = Regex.Match(input, pattern, RegexOptions.IgnoreCase)
+    if (m.Success) then
+      Some true
+    else
+      None
+
+  let (|IsBlock|_|) input =
+    let pattern = ".*\\[Block:([a-z0-9]*)\\]"
+    let m = Regex.Match(input, pattern, RegexOptions.IgnoreCase)
+    if (m.Success) then
+      Some m.Groups.[1].Value
     else
       None
 
@@ -82,17 +107,64 @@ module DocGen =
                   CaptureState = Nothing
                   Offset = 0
               }
+            | IsBeginBlock groupName ->
+                { result with
+                    CaptureState = Block groupName
+                    Offset = countStart (line.ToCharArray() |> Array.toList) 0
+                }
+            | IsEndBlock _ ->
+                { result with
+                    CaptureState = Nothing
+                    Offset = 0
+                }
             | line ->
                 match result.CaptureState with
                 | Content ->
+                    match line with
+                    | IsBlock name ->
+                        let exist = result.Blocks |> List.exists(fun x -> x.Key = name)
+                        let blockText =
+                          if exist then
+                            result.Blocks
+                            |> List.filter(fun x ->
+                              x.Key = name
+                            )
+                            |> List.head
+                            |> (fun x ->
+                              x.Text
+                            )
+                          else
+                            ""
+                        { result with
+                            Text = sprintf "%s\n%s" result.Text blockText
+                        }
+                    | _ ->
+                        { result with
+                            Text = sprintf "%s\n%s" result.Text (line.Substring(result.Offset))
+                        }
+                | Block key ->
+                    let exist = result.Blocks |> List.exists(fun x -> x.Key = key)
+
+                    let blocks' =
+                      if exist then
+                        result.Blocks
+                        |> List.map(fun x ->
+                          if x.Key = key then
+                            { x with
+                                Text = sprintf "%s\n%s" x.Text (line.Substring(result.Offset))
+                            }
+                          else
+                            x
+                        )
+                      else
+                        Block.Create key (line.Substring(result.Offset)) :: result.Blocks
+
                     { result with
-                        Text = sprintf "%s\n%s" result.Text (line.Substring(result.Offset))
+                        Blocks = blocks'
                     }
-                | Group key -> result
                 | Nothing -> result
           parseSample xs newResult
       | [] -> result
 
     let result = parseSample lines ParserResult.Initial
-    console.log result.Text
     result.Text

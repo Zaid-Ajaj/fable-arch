@@ -15,10 +15,6 @@ open System
 
 module Counter =
 
-  console.log __SOURCE_DIRECTORY__
-  console.log __SOURCE_FILE__
-
-
   type Actions
       = Add
       | Sub

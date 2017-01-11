@@ -57,6 +57,7 @@
     <Compile Include="libs\Aether.fs" />
     <Compile Include="libs\Fable.Import.Marked.fs" />
     <Compile Include="libs\Fable.Import.HighlightJS.fs" />
+    <Compile Include="libs\Fable.Import.PrismJS.fs" />
     <Compile Include="Herebris.SimpleDatabase.fs" />
     <Compile Include="DocGen.fs" />
     <Compile Include="Common.fs" />

@@ -306,12 +306,15 @@ module Main =
   |> ignore
 
 
-  // Configure markdown parser and highlight
+  [<Emit("Prism.languages.fsharp")>]
+  let prismFSharp = ""
 
+  // Configure markdown parser
   let options =
     createObj [
-      "highlight" ==> fun code -> hljs.Globals.highlightAuto(code).value
-      "langPrefix" ==> "hljs "
+      //"highlight" ==> fun code -> hljs.Globals.highlightAuto(code).value
+      "highlight" ==> fun code -> console.log code; PrismJS.Globals.Prism.highlight(code, unbox prismFSharp)
+      "langPrefix" ==> "language-"
     ]
 
   Marked.Globals.marked.setOptions(unbox options)
