@@ -51,9 +51,22 @@ module Header =
       model, message
 
   let footerLinkItem menuLink currentPage =
+    let isCurrentPage =
+      match currentPage with
+      | Index | About ->
+          menuLink.Route = currentPage
+      | Sample _ ->
+          match menuLink.Route with
+          | Sample  _ -> true
+          | _ -> false
+      | Docs _ ->
+          match menuLink.Route with
+          | Docs _ -> true
+          | _ -> false
+
     li
       [ classList
-          [ "is-active", menuLink.Route = currentPage
+          [ "is-active", isCurrentPage
           ]
       ]
       [ a
@@ -79,7 +92,7 @@ module Header =
               [ footerLinks
                   [ HeroLink.Create("Home", Route.Index)
                     HeroLink.Create("Docs", (Route.Docs DocsApi.Index))
-                    HeroLink.Create("Samples", (Route.Sample SampleApi.Clock))
+                    HeroLink.Create("Samples", (Route.Sample SampleApi.HelloWorld))
                     HeroLink.Create("About", Route.About)
                   ]
                   model.CurrentPage

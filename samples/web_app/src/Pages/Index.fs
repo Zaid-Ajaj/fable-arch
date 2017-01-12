@@ -47,7 +47,7 @@ request [for the samples directory](https://github.com/fable-compiler/fable-arch
 
 ## Sample applications
 
-* [Hello world - simple application with one input](samples/helloworld/index.html)
+* [Hello world - simple application with one input](#/sample/hello-world)
 * [Clock - demo of how to have the app consume events from outside the app using a producer](samples/clock/index.html)
 * [Nesting - how to nest modules/apps together](samples/nesting/index.html)
 * [Subscriber demo - sample that shows how to log everyting from the app to the console](samples/subscriberexample/index.html)
@@ -57,7 +57,6 @@ request [for the samples directory](https://github.com/fable-compiler/fable-arch
 * [Navigation - a navigation sample](samples/navigation/index.html)
 * [Devtools - shows what the devtools look like](samples/plugin/index.html)
 * [React - a simple counter that uses react for rendering, also with devtools](samples/react/index.html)
-
       "
 
     div
@@ -71,4 +70,3 @@ request [for the samples directory](https://github.com/fable-compiler/fable-arch
               []
           ]
       ]
-

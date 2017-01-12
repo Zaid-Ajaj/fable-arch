@@ -31,7 +31,7 @@ module Index =
 
   let update model action =
     match action with
-    | NoOp -> 
+    | NoOp ->
         model, []
     | Init ->
         let message =
@@ -83,7 +83,7 @@ module Index =
 
   let row (item: UserRecord) =
     tr
-      [ classy "is-clickable" 
+      [ classy "is-clickable"
         onMouseClick(fun _ ->
           console.log "row"; NoOp
         )
@@ -128,7 +128,7 @@ module Index =
     td
       [ classy "has-text-centered"
         attribute "colspan" "6" ]
-      [ i 
+      [ i
           [ classy "fa fa-spinner fa-spin" ]
           []
       ]
@@ -142,20 +142,21 @@ module Index =
         else
           (model.Users |> List.map row)
       )
-      
+
   let actionArea =
     div
       [ classy "column is-2 is-offset-5" ]
       [ a
-          [ classy "button is-primary" 
+          [ classy "button is-primary"
             voidLinkAction<Actions>
             onMouseClick(fun _ ->
-              NavigateTo (Route.User UserApi.Create)
+              //NavigateTo (Route.User UserApi.Create)
+              NoOp
             )
           ]
           [ text "Create a user" ]
       ]
-    
+
 
   let view model =
     div
@@ -173,4 +174,4 @@ module Index =
               ]
           ]
       ]
-     
+

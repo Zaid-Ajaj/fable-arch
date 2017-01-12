@@ -82,8 +82,8 @@ module Menu =
       [ classy "menu" ]
       [ menuSection "Users"
         menuList
-          [ MenuLink.Create("Index", (Route.User UserApi.Index))
-            MenuLink.Create("Create", (Route.User UserApi.Create))
+          [ //MenuLink.Create("Index", (Route.User UserApi.Index))
+            //MenuLink.Create("Create", (Route.User UserApi.Create))
           ]
           model.CurrentPage
       ]

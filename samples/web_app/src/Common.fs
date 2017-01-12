@@ -28,7 +28,6 @@ module Common =
   type Route
     = Index
     | Docs of DocsApi.Route
-    | User of UserApi.Route
     | Sample of SampleApi.Route
     | About
 
@@ -45,12 +44,12 @@ module Common =
         | SampleApi.Counter -> Some "/sample/counter"
         | SampleApi.HelloWorld -> Some "/sample/hello-world"
       | About -> Some "/about"
-      | User api ->
-        match api with
-        | UserApi.Index -> Some "/users"
-        | UserApi.Create -> Some "/user/create"
-        | UserApi.Edit id -> Some (sprintf "/user/%i/edit" id)
-        | UserApi.Show id -> Some (sprintf "/user/%i" id)
+//      | User api ->
+//        match api with
+//        | UserApi.Index -> Some "/users"
+//        | UserApi.Create -> Some "/user/create"
+//        | UserApi.Edit id -> Some (sprintf "/user/%i/edit" id)
+//        | UserApi.Show id -> Some (sprintf "/user/%i" id)
 
   let voidLinkAction<'T> : Attribute<'T> = attribute "href" "javascript:void(0)"
 

@@ -140,23 +140,6 @@ module Main =
             |> Optic.set (Model.CurrentPage_) route
 
           m', []
-      | User subRoute ->
-          let m' =
-            model
-            |> Optic.set (Model.SubModels_ >-> SubModels.User_) (Pages.User.Dispatcher.Model.Initial(subRoute))
-            |> Optic.set (Model.SubModels_ >-> SubModels.Header_ >-> Header.Model.CurrentPage_) route
-            |> Optic.set (Model.SubModels_ >-> SubModels.Menu_ >-> Menu.Model.CurrentPage_) route
-            |> Optic.set (Model.SubModels_ >-> SubModels.Navbar_ >-> Navbar.Model.CurrentPage_) route
-            |> Optic.set (Model.CurrentPage_) route
-
-          let message =
-            match subRoute with
-            | UserApi.Route.Index ->
-              [ fun h ->
-                  h (UserDispatcherAction (Pages.User.Dispatcher.Actions.IndexActions Pages.User.Index.Actions.Init))
-              ]
-            | _ -> []
-          m', message
     | IndexActions act ->
         let (res, action) = Pages.Index.update model.SubModels.Index.Value act
         let action' = mapActions IndexActions action
@@ -211,7 +194,6 @@ module Main =
       | Docs subRoute -> Html.map DocsDispatcherAction (Pages.Docs.Dispatcher.view model.SubModels.Docs.Value subRoute)
       | Sample subRoute -> Html.map SampleDispatcherAction (Pages.Sample.Dispatcher.view model.SubModels.Sample.Value subRoute)
       | About -> Html.map AboutActions (Pages.About.view model.SubModels.About.Value)
-      | User subRoute -> Html.map UserDispatcherAction (Pages.User.Dispatcher.view model.SubModels.User.Value subRoute)
 
     let navbarHtml =
       Html.map NavbarActions (Navbar.view model.SubModels.Navbar)
@@ -242,10 +224,6 @@ module Main =
       runM (NavigateTo (Sample SampleApi.Counter)) (pStaticStr "/sample/counter" |> (drop >> _end))
       runM (NavigateTo (Sample SampleApi.HelloWorld)) (pStaticStr "/sample/hello-world" |> (drop >> _end))
       runM (NavigateTo About) (pStaticStr "/about" |> (drop >> _end))
-      runM (NavigateTo (User UserApi.Index)) (pStaticStr "/users" |> (drop >> _end))
-      runM (NavigateTo (User UserApi.Create)) (pStaticStr "/user/create" |> (drop >> _end))
-      runM1 (fun id -> (NavigateTo (User (UserApi.Edit id)))) (pStaticStr "/user" </.> pint <./> pStaticStr "edit")
-      runM1 (fun id -> (NavigateTo (User (UserApi.Show id)))) (pStaticStr "/user" </.> pint)
     ]
 
 
