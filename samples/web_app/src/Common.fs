@@ -23,6 +23,7 @@ module Common =
     type Route
       = Clock
       | Counter
+      | HelloWorld
 
   type Route
     = Index
@@ -42,6 +43,7 @@ module Common =
         match api with
         | SampleApi.Clock -> Some "/sample/clock"
         | SampleApi.Counter -> Some "/sample/counter"
+        | SampleApi.HelloWorld -> Some "/sample/hello-world"
       | About -> Some "/about"
       | User api ->
         match api with
@@ -120,6 +122,7 @@ module Common =
     module Html =
 
       open Fable.Core.JsInterop
+      open Fable.Import
 
       let onInput x = onEvent "oninput" (fun e -> x (unbox e?target?value))
 
@@ -147,3 +150,43 @@ module Common =
                   ]
               ]
           ]
+
+      let sampleView title sampleDemoView markdownText =
+        let markdownHTML =
+          if markdownText = "" then
+            div
+              [ classy "has-text-centered" ]
+              [ i
+                  [ classy "fa fa-spinner fa-pulse fa-4x fa-fw" ]
+                  []
+              ]
+          else
+            div
+              [ classy "content"
+                property "innerHTML" markdownText
+              ]
+              []
+
+        div
+          [ classy "section" ]
+          [ div
+              [ classy "content" ]
+              [ h1
+                  []
+                  [ text title ]
+              ]
+            div
+              [ classy "columns" ]
+              [ div
+                  [ classy "column is-half is-offset-one-quarter" ]
+                  [ sampleDemoView ]
+              ]
+            div
+              [ classy "content" ]
+              [ h1
+                  []
+                  [ text "Explanations" ]
+                markdownHTML
+              ]
+          ]
+

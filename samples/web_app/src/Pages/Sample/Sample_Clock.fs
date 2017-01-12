@@ -9,6 +9,7 @@ open Fable.PowerPack
 open Fable.PowerPack.Fetch
 
 open WebApp
+open WebApp.Common
 
 open System
 
@@ -58,7 +59,7 @@ module Clock =
 
   let sampleDemo model =
     div
-      [ classy "content" ]
+      [ classy "content has-text-centered" ]
       [ h1
           [ classy "is-marginless" ]
           [ text (sprintf "%s %s" model.Date model.Time )]
@@ -80,32 +81,10 @@ module Clock =
 
   /// Our application view
   let view model =
-
-    div
-      [ classy "section" ]
-      [ div
-          [ classy "content" ]
-          [ h1
-              []
-              [ text "Clock sample" ]
-          ]
-        div
-          [ classy "columns" ]
-          [ div
-              [ classy "column is-half is-offset-one-quarter has-text-centered" ]
-              [ sampleDemo model ]
-          ]
-        div
-          [ classy "content"
-            property "innerHTML" docs
-          ]
-          []
-      ]
+    VDom.Html.sampleView "Clock sample" (sampleDemo model) docs
 
   (*
   [BeginDocs]
-
-  # ClockSample
 
   This sample is a simple sample to show you how to use producers.
   A producer, is used to push a message into your application from the outside world of the application.
@@ -120,55 +99,6 @@ module Clock =
   ## Producer sample
   ```fsharp
   [Block:Update]
-  ```
-
-
-  ## Producer sample
-  ```fsharp
-  let update2 model action =
-    let model, action =
-      match action with
-      /// Tick are push by the producer
-      | Tick datetime ->
-        // Normalize the day and month to ensure a 2 digit representation
-        let day = datetime.Day |> normalizeNumber
-        let month = datetime.Month |> normalizeNumber
-        // Create our date string
-        let date = sprintf "%s/%s/%i" month day datetime.Year
-        { model with
-            Time = String.Format("{0:HH:mm:ss}", datetime)
-            Date = date }, []
-    "test"
-  ```
-
-
-
-  ## Producer sample
-  ```fsharp
-  let tickProducer push =
-    window.setInterval((fun _ ->
-        push(SampleDispatcherAction (Pages.Sample.Dispatcher.ClockActions (Pages.Sample.Clock.Tick DateTime.Now)))
-        null
-    ),
-        1000) |> ignore
-    // Force the first to push to have immediate effect
-    // If we don't do that there is one second before the first push
-    // and the view is rendered with the Model.init values
-    push(SampleDispatcherAction (Pages.Sample.Dispatcher.ClockActions (Pages.Sample.Clock.Tick DateTime.Now)))
-  let update model action =
-    let model, action =
-      match action with
-      /// Tick are push by the producer
-      | Tick datetime ->
-        // Normalize the day and month to ensure a 2 digit representation
-        let day = datetime.Day |> normalizeNumber
-        let month = datetime.Month |> normalizeNumber
-        // Create our date string
-        let date = sprintf "%s/%s/%i" month day datetime.Year
-        { model with
-            Time = String.Format("{0:HH:mm:ss}", datetime)
-            Date = date }, []
-    "test"
   ```
 
   [EndDocs]

@@ -14,17 +14,20 @@ module Dispatcher =
   type Model =
     { Clock: Clock.Model option
       Counter: Counter.Model option
+      HelloWorld: HelloWorld.Model option
     }
 
-    static member Generate (?index, ?counter) =
+    static member Generate (?index, ?counter, ?helloWorld) =
       { Clock = index
         Counter = counter
+        HelloWorld = helloWorld
       }
 
     static member Initial (currentPage: SampleApi.Route) =
       match currentPage with
       | SampleApi.Clock -> Model.Generate (index = Clock.Model.Initial)
       | SampleApi.Counter -> Model.Generate (counter = Counter.Model.Initial)
+      | SampleApi.HelloWorld -> Model.Generate (helloWorld = "" )
 
   type NavbarLink =
     { Text: string
@@ -37,9 +40,11 @@ module Dispatcher =
       }
 
   type Actions
-    = ClockActions of Clock.Actions
+    = NavigateTo of SampleApi.Route
+    | ClockActions of Clock.Actions
     | CounterActions of Counter.Actions
-    | NavigateTo of SampleApi.Route
+    | HelloWorldActions of HelloWorld.Actions
+
 
   let update model action =
     match action with
@@ -51,6 +56,10 @@ module Dispatcher =
         let (res, action) = Counter.update model.Counter.Value act
         let action' = mapActions CounterActions action
         { model with Counter = Some res}, action'
+    | HelloWorldActions act ->
+        let (res, action) = HelloWorld.update model.HelloWorld.Value act
+        let action' = mapActions HelloWorldActions action
+        { model with HelloWorld = Some res}, action'
     | NavigateTo route ->
         let message =
           [ fun h ->
@@ -89,6 +98,8 @@ module Dispatcher =
           Html.map ClockActions (Clock.view model.Clock.Value)
       | SampleApi.Counter ->
           Html.map CounterActions (Counter.view model.Counter.Value)
+      | SampleApi.HelloWorld ->
+          Html.map HelloWorldActions (HelloWorld.view model.HelloWorld.Value)
 
     div
       []
@@ -97,8 +108,9 @@ module Dispatcher =
           [ div
               [ classy "container" ]
               [ navbar
-                  [ NavbarLink.Create("Clock", SampleApi.Clock)
+                  [ NavbarLink.Create("Hello World", SampleApi.HelloWorld)
                     NavbarLink.Create("Counter", SampleApi.Counter)
+                    NavbarLink.Create("Clock", SampleApi.Clock)
                   ]
                   subRoute
               ]

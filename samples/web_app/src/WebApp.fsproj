@@ -75,6 +75,7 @@
     <Compile Include="Pages\Docs\Docs_Dispatcher.fs" />
     <Compile Include="Pages\Sample\Sample_Clock.fs" />
     <Compile Include="Pages\Sample\Sample_Counter.fs" />
+    <Compile Include="Pages\Sample\Sample_HelloWorld.fs" />
     <Compile Include="Pages\Sample\Sample_Dispatcher.fs" />
     <Compile Include="Menu.fs" />
     <Compile Include="Navbar.fs" />

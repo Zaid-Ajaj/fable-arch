@@ -240,6 +240,7 @@ module Main =
       runM (NavigateTo (Docs DocsApi.HMR)) (pStaticStr "/docs/hmr" |> (drop >> _end))
       runM (NavigateTo (Sample SampleApi.Clock)) (pStaticStr "/sample/clock" |> (drop >> _end))
       runM (NavigateTo (Sample SampleApi.Counter)) (pStaticStr "/sample/counter" |> (drop >> _end))
+      runM (NavigateTo (Sample SampleApi.HelloWorld)) (pStaticStr "/sample/hello-world" |> (drop >> _end))
       runM (NavigateTo About) (pStaticStr "/about" |> (drop >> _end))
       runM (NavigateTo (User UserApi.Index)) (pStaticStr "/users" |> (drop >> _end))
       runM (NavigateTo (User UserApi.Create)) (pStaticStr "/user/create" |> (drop >> _end))
@@ -303,7 +304,6 @@ module Main =
   else
     // Else trigger hashchange to navigate to current route
     window.dispatchEvent(Event.Create("hashchange") ) |> ignore
-  |> ignore
 
 
   [<Emit("Prism.languages.fsharp")>]
