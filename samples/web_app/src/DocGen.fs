@@ -79,6 +79,14 @@ module DocGen =
     else
       None
 
+  let (|IsFsharpBlock|_|) input =
+    let pattern = ".*\\[FsharpBlock:([a-z0-9]*)\\]"
+    let m = Regex.Match(input, pattern, RegexOptions.IgnoreCase)
+    if (m.Success) then
+      Some m.Groups.[1].Value
+    else
+      None
+
   let rec countStart (chars: char list) index =
     match chars with
     | x::xs ->
@@ -88,6 +96,24 @@ module DocGen =
           index
     | [] ->
         index
+
+  let generateBlock result blockName format =
+    let exist = result.Blocks |> List.exists(fun x -> x.Key = blockName)
+    let blockText =
+      if exist then
+        result.Blocks
+        |> List.filter(fun x ->
+          x.Key = blockName
+        )
+        |> List.head
+        |> (fun x ->
+          x.Text
+        )
+      else
+        ""
+    { result with
+        Text = sprintf format result.Text blockText
+    }
 
   let generateDocumentation (text: string) =
     let lines = text.Split('\n') |> Array.toList
@@ -122,22 +148,9 @@ module DocGen =
                 | Content ->
                     match line with
                     | IsBlock name ->
-                        let exist = result.Blocks |> List.exists(fun x -> x.Key = name)
-                        let blockText =
-                          if exist then
-                            result.Blocks
-                            |> List.filter(fun x ->
-                              x.Key = name
-                            )
-                            |> List.head
-                            |> (fun x ->
-                              x.Text
-                            )
-                          else
-                            ""
-                        { result with
-                            Text = sprintf "%s\n%s" result.Text blockText
-                        }
+                        generateBlock result name "%s\n%s"
+                    | IsFsharpBlock name ->
+                        generateBlock result name "%s\n```fsharp\n%s```"
                     | _ ->
                         { result with
                             Text = sprintf "%s\n%s" result.Text (line.Substring(result.Offset))
