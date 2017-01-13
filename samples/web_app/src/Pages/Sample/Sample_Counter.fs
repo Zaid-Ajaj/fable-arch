@@ -15,12 +15,14 @@ open System
 
 module Counter =
 
+  /// [BeginBlock:Actions]
   type Actions
       = Add
       | Sub
       | Reset
+  /// [EndBlock]
 
-  /// A really simple type to Store our ModelChanged
+  /// [BeginBlock:Model]
   type Model =
       { Value: int
       }
@@ -28,8 +30,9 @@ module Counter =
       /// Static member giving back an init Model
       static member Initial =
         { Value = 0 }
+  /// [EndBlock]
 
-  /// Handle all the update of our Application
+  /// [BeginBlock:Update]
   let update model action =
     match action with
     | Add ->
@@ -38,8 +41,9 @@ module Counter =
         { model with Value = model.Value - 1 }, []
     | Reset ->
         { model with Value = 0 }, []
+  /// [EndBlock]
 
-
+  /// [BeginBlock:View]
   let simpleButton txt action =
     div
       [ classy "column is-narrow" ]
@@ -66,40 +70,44 @@ module Counter =
         simpleButton "-1" Sub
         simpleButton "Reset" Reset
       ]
+  /// [EndBlock]
 
-
-  let sampleText =
-    "
-```fs
-
-```
-    "
+  let docs = new DocGen.Documentation(__SOURCE_FILE__)
 
   /// Our application view
   let view model =
-    div
-      [ classy "section" ]
-      [ div
-          [ classy "content" ]
-          [ h1
-              []
-              [ text "Counter sample" ]
-          ]
-        div
-          [ classy "columns" ]
-          [ div
-              [ classy "column is-half is-offset-one-quarter has-text-centered" ]
-              [ div
-                  [ classy "columns is-vcentered" ]
-                  [ div [ classy "column" ] []
-                    sampleDemo model
-                    div [ classy "column" ] []
-                  ]
-              ]
-          ]
-        div
-          [ classy "content"
-            property "innerHTML" (Marked.Globals.marked.parse(sampleText))
-          ]
-          []
-      ]
+    VDom.Html.sampleView "Counter sample" (sampleDemo model) docs.Html
+
+  (*
+  [BeginDocs]
+
+  This sample will show you how to create a counter.
+
+  ## Model
+
+  The model will be a simple record holding a value.
+
+  [FsharpBlock:Model]
+
+  ## Actions
+
+  There are three actions for the counter:
+
+  * Add 1 to the current value.
+  * Substract 1 to the current value.
+  * Reset the value to 0.
+
+  [FsharpBlock:Actions]
+
+  ## Update
+
+  [FsharpBlock:Update]
+
+  ## View
+
+  For the view, we create an helper function `simpleButton` in order to make the final view cleaner and avoid to repeat ourself.
+
+  [FsharpBlock:View]
+
+  [EndDocs]
+  *)

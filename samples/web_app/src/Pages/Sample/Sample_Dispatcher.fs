@@ -15,12 +15,14 @@ module Dispatcher =
     { Clock: Clock.Model option
       Counter: Counter.Model option
       HelloWorld: HelloWorld.Model option
+      NestedCounter: NestedCounter.Model option
     }
 
-    static member Generate (?index, ?counter, ?helloWorld) =
+    static member Generate (?index, ?counter, ?helloWorld, ?nestedCounter) =
       { Clock = index
         Counter = counter
         HelloWorld = helloWorld
+        NestedCounter = nestedCounter
       }
 
     static member Initial (currentPage: SampleApi.Route) =
@@ -28,6 +30,7 @@ module Dispatcher =
       | SampleApi.Clock -> Model.Generate (index = Clock.Model.Initial)
       | SampleApi.Counter -> Model.Generate (counter = Counter.Model.Initial)
       | SampleApi.HelloWorld -> Model.Generate (helloWorld = "" )
+      | SampleApi.NestedCounter -> Model.Generate (nestedCounter = NestedCounter.Model.Initial)
 
   type NavbarLink =
     { Text: string
@@ -44,6 +47,7 @@ module Dispatcher =
     | ClockActions of Clock.Actions
     | CounterActions of Counter.Actions
     | HelloWorldActions of HelloWorld.Actions
+    | NestedCounterActions of NestedCounter.Actions
 
 
   let update model action =
@@ -60,6 +64,10 @@ module Dispatcher =
         let (res, action) = HelloWorld.update model.HelloWorld.Value act
         let action' = mapActions HelloWorldActions action
         { model with HelloWorld = Some res}, action'
+    | NestedCounterActions act ->
+        let (res, action) = NestedCounter.update model.NestedCounter.Value act
+        let action' = mapActions NestedCounterActions action
+        { model with NestedCounter = Some res}, action'
     | NavigateTo route ->
         let message =
           [ fun h ->
@@ -100,6 +108,9 @@ module Dispatcher =
           Html.map CounterActions (Counter.view model.Counter.Value)
       | SampleApi.HelloWorld ->
           Html.map HelloWorldActions (HelloWorld.view model.HelloWorld.Value)
+      | SampleApi.NestedCounter ->
+          Html.map NestedCounterActions (NestedCounter.view model.NestedCounter.Value)
+
 
     div
       []
@@ -108,8 +119,9 @@ module Dispatcher =
           [ div
               [ classy "container" ]
               [ navbar
-                  [ NavbarLink.Create("Hello World", SampleApi.HelloWorld)
+                  [ NavbarLink.Create("Hello world", SampleApi.HelloWorld)
                     NavbarLink.Create("Counter", SampleApi.Counter)
+                    NavbarLink.Create("Nested counter", SampleApi.NestedCounter)
                     NavbarLink.Create("Clock", SampleApi.Clock)
                   ]
                   subRoute

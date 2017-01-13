@@ -845,9 +845,9 @@ fable-arch@next:
   version "0.10.0-alpha.1"
   resolved "https://registry.yarnpkg.com/fable-arch/-/fable-arch-0.10.0-alpha.1.tgz#16db4b51e3eb5492fd309fb8d276d3e5c07452ff"
 
-fable-compiler@^0.7.26:
-  version "0.7.26"
-  resolved "https://registry.yarnpkg.com/fable-compiler/-/fable-compiler-0.7.26.tgz#edffee88c355c0edc67465493e4b4c1f549d0dde"
+fable-compiler@^0.7.29:
+  version "0.7.29"
+  resolved "https://registry.yarnpkg.com/fable-compiler/-/fable-compiler-0.7.29.tgz#ad891ec87fac03c008b3e94be7bda26c401d2466"
   dependencies:
     babel-core "^6.18.2"
     babel-dts-generator "^0.6.2"
@@ -868,9 +868,9 @@ fable-compiler@^0.7.26:
     rollup-plugin-node-resolve "^2.0.0"
     semver "^5.3.0"
 
-fable-core@^0.7.19:
-  version "0.7.19"
-  resolved "https://registry.yarnpkg.com/fable-core/-/fable-core-0.7.19.tgz#13e7575e3d993472e34701ad12e25ae6ee01c966"
+fable-core@^0.7.21:
+  version "0.7.21"
+  resolved "https://registry.yarnpkg.com/fable-core/-/fable-core-0.7.21.tgz#4075a6173d52cc28b86acf88f40ace60c7dce312"
 
 fable-powerpack@^0.0.19:
   version "0.0.19"

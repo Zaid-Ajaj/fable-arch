@@ -65,23 +65,11 @@ module Clock =
           [ text (sprintf "%s %s" model.Date model.Time )]
       ]
 
-  let mutable docs = ""
-
-  fetch (DocGen.createSampleURL __SOURCE_FILE__) []
-  |> Promise.bind(fun res ->
-    res.text()
-  )
-  |> Promise.map(fun text ->
-    docs <-
-      DocGen.generateDocumentation text
-      |> Marked.Globals.marked.parse
-  )
-  |> ignore
-
+  let docs = new DocGen.Documentation(__SOURCE_FILE__)
 
   /// Our application view
   let view model =
-    VDom.Html.sampleView "Clock sample" (sampleDemo model) docs
+    VDom.Html.sampleView "Clock sample" (sampleDemo model) docs.Html
 
   (*
   [BeginDocs]

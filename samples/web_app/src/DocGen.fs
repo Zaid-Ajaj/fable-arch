@@ -1,11 +1,10 @@
 ﻿namespace WebApp
 
 open Fable.Core
-open Fable.Import.Browser
-
-open System
+open Fable.Import
+open Fable.PowerPack.Fetch
+open Fable.PowerPack
 open System.Text.RegularExpressions
-open System.Collections.Generic
 
 module DocGen =
 
@@ -181,3 +180,28 @@ module DocGen =
 
     let result = parseSample lines ParserResult.Initial
     result.Text
+
+  /// Simple class used to fetch and cache the generated docs
+  type Documentation (url) =
+    let mutable generated = false
+    let mutable html = ""
+    let sourceFile = createSampleURL url
+
+    member self.RetrieveFile () =
+        fetch sourceFile []
+        |> Promise.bind(fun res ->
+          res.text()
+        )
+        |> Promise.map(fun text ->
+          html <-
+            generateDocumentation text
+            |> Marked.Globals.marked.parse
+          generated <- true
+        )
+        |> ignore
+
+    member self.Html
+      with get() : string =
+        if not generated then
+          self.RetrieveFile()
+        html

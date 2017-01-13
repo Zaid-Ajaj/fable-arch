@@ -69,8 +69,9 @@ module Navbar =
       [ classy "nav-item"]
       [ a
           [ classy "button"
-            attribute "href" "https://twitter.com/FableCompiler"
-            attribute "target" "_blank"
+            property "id" "twitter"
+            property "href" "https://twitter.com/FableCompiler"
+            property "target" "_blank"
           ]
           [ span
               [ classy "icon" ]
@@ -84,8 +85,9 @@ module Navbar =
           ]
         a
           [ classy "button"
-            attribute "href" "https://github.com/fable-compiler/fable-arch"
-            attribute "target" "_blank"
+            property "id" "github"
+            property "href" "https://github.com/fable-compiler/fable-arch"
+            property "target" "_blank"
           ]
           [ span
               [ classy "icon"]
@@ -111,10 +113,10 @@ module Navbar =
               [ text "Fable-Arch"
               ]
           ]
-//        div
-//          [ classy "nav-right nav-menu" ]
-//          [ navItem (NavLink.Create("Home", Route.Index)) model.CurrentPage
-//            navItem (NavLink.Create("About", Route.About)) model.CurrentPage
-//          ]
+        a
+          [ classy "nav-item"
+            property "href" "http://fable.io/"
+          ]
+          [ text "Fable.io" ]
         navButton
       ]

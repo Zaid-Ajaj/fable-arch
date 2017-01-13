@@ -55,22 +55,11 @@ module HelloWorld =
       ]
   /// [EndBlock]
 
-  let mutable docs = ""
-
-  fetch (DocGen.createSampleURL __SOURCE_FILE__) []
-  |> Promise.bind(fun res ->
-    res.text()
-  )
-  |> Promise.map(fun text ->
-    docs <-
-      DocGen.generateDocumentation text
-      |> Marked.Globals.marked.parse
-  )
-  |> ignore
+  let docs = new DocGen.Documentation(__SOURCE_FILE__)
 
   /// Our application view
   let view model =
-    VDom.Html.sampleView "Hello world sample" (sampleDemo model) docs
+    VDom.Html.sampleView "Hello world sample" (sampleDemo model) docs.Html
 
   (*
   [BeginDocs]
@@ -108,6 +97,12 @@ module HelloWorld =
   The view function is where we set up the VirtualDom used by the display.
 
   [FsharpBlock:View]
+
+  The function `VDom.Html.onInput` is a simple helper to access the value from the onInput event. Below is its definition.
+
+  ```fsharp
+  let onInput x = onEvent "oninput" (fun e -> x (unbox e?target?value))
+  ```
 
   [EndDocs]
   *)

@@ -24,6 +24,7 @@ module Common =
       = Clock
       | Counter
       | HelloWorld
+      | NestedCounter
 
   type Route
     = Index
@@ -43,6 +44,7 @@ module Common =
         | SampleApi.Clock -> Some "/sample/clock"
         | SampleApi.Counter -> Some "/sample/counter"
         | SampleApi.HelloWorld -> Some "/sample/hello-world"
+        | SampleApi.NestedCounter -> Some "/sample/nested-counter"
       | About -> Some "/about"
 //      | User api ->
 //        match api with
@@ -51,7 +53,7 @@ module Common =
 //        | UserApi.Edit id -> Some (sprintf "/user/%i/edit" id)
 //        | UserApi.Show id -> Some (sprintf "/user/%i" id)
 
-  let voidLinkAction<'T> : Attribute<'T> = attribute "href" "javascript:void(0)"
+  let voidLinkAction<'T> : Attribute<'T> = property "href" "javascript:void(0)"
 
   [<AutoOpen>]
   module Types =
@@ -150,13 +152,15 @@ module Common =
               ]
           ]
 
+      let column<'T> : DomNode<'T> = div [ classy "column" ] []
+
       let sampleView title sampleDemoView markdownText =
         let markdownHTML =
           if markdownText = "" then
             div
               [ classy "has-text-centered" ]
               [ i
-                  [ classy "fa fa-spinner fa-pulse fa-4x fa-fw" ]
+                  [ classy "fa fa-spinner fa-pulse fa-3x fa-fw" ]
                   []
               ]
           else
