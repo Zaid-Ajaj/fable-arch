@@ -70,8 +70,7 @@
     <Compile Include="Pages\User\User_Create.fs" />
     <Compile Include="Pages\User\User_Edit.fs" />
     <Compile Include="Pages\User\User_Dispatcher.fs" />
-    <Compile Include="Pages\Docs\Docs_HMR.fs" />
-    <Compile Include="Pages\Docs\Docs_Index.fs" />
+    <Compile Include="Pages\Docs\Docs_Viewer.fs" />
     <Compile Include="Pages\Docs\Docs_Dispatcher.fs" />
     <Compile Include="Pages\Sample\Sample_Clock.fs" />
     <Compile Include="Pages\Sample\Sample_Counter.fs" />

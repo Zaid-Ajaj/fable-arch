@@ -16,6 +16,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "public", "public", "{bdc2cb
 		public\css\style.css = public\css\style.css
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scss", "scss", "{df9e3093-65e8-4eb5-8870-21d1f3b554b8}"
+	ProjectSection(SolutionItems) = preProject
+		scss\main.sass = scss\main.sass
+	EndProjectSection
+EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "WebApp", "src\WebApp.fsproj", "{861B39F3-785E-45AB-90B4-3CC720C1EC0B}"
 EndProject
 Global

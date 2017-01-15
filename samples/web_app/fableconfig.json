@@ -1,4 +1,5 @@
 {
+  "sourceMap":  true,
   "projFile": "./src/WebApp.fsproj",
   "outDir": "./out",
   // Add babel-plugin-transform-runtime to optimize the helper

@@ -64,41 +64,30 @@ module Navbar =
       ]
       [ text navLink.Text ]
 
-  let navButton =
+  let navButton id href faClass txt =
+    a
+      [ classy "button"
+        property "id" id
+        property "href" href
+        property "target" "_blank"
+      ]
+      [ span
+          [ classy "icon"]
+          [ i
+              [ classy (sprintf "fa %s" faClass) ]
+              []
+          ]
+        span
+          []
+          [ text txt ]
+      ]
+
+  let navButtons =
     span
       [ classy "nav-item"]
-      [ a
-          [ classy "button"
-            property "id" "twitter"
-            property "href" "https://twitter.com/FableCompiler"
-            property "target" "_blank"
-          ]
-          [ span
-              [ classy "icon" ]
-              [ i
-                  [ classy "fa fa-twitter" ]
-                  []
-              ]
-            span
-              []
-              [ text "Twitter" ]
-          ]
-        a
-          [ classy "button"
-            property "id" "github"
-            property "href" "https://github.com/fable-compiler/fable-arch"
-            property "target" "_blank"
-          ]
-          [ span
-              [ classy "icon"]
-              [ i
-                  [ classy "fa fa-github" ]
-                  []
-              ]
-            span
-              []
-              [ text "Fork me" ]
-          ]
+      [ navButton "fable" "http://fable.io/" "fa-github" "Fable"
+        navButton "twitter" "https://twitter.com/FableCompiler" "fa-twitter" "Twitter"
+        navButton "github" "https://github.com/fable-compiler/fable-arch" "fa-github" "Fork me"
       ]
 
   let view model =
@@ -113,10 +102,5 @@ module Navbar =
               [ text "Fable-Arch"
               ]
           ]
-        a
-          [ classy "nav-item"
-            property "href" "http://fable.io/"
-          ]
-          [ text "Fable.io" ]
-        navButton
+        navButtons
       ]

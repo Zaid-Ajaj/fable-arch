@@ -10,13 +10,13 @@ open Fable.Arch.Html
 open WebApp.Common
 open WebApp
 
-module HMR =
+module Viewer =
 
   type Model =
     { Content: string
     }
 
-    static member Initial =
+    static member Initial fileName =
       { Content = ""
       }
 
@@ -51,6 +51,6 @@ module HMR =
   let view model =
     div
       []
-      [ text "HMR documentation"
+      [ text "Index documentation"
       ]
 

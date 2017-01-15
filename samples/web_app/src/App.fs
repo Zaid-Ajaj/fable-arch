@@ -91,8 +91,8 @@ module Main =
     | IndexActions of Pages.Index.Actions
     | AboutActions of Pages.About.Actions
     | UserDispatcherAction of Pages.User.Dispatcher.Actions
-    | DocsDispatcherAction of Pages.Docs.Dispatcher.Actions
     | SampleDispatcherAction of Pages.Sample.Dispatcher.Actions
+    | DocsDispatcherAction of Pages.Docs.Dispatcher.Actions
     | MenuActions of Menu.Actions
     | HeaderActions of Header.Actions
     | NavbarActions of Navbar.Actions
@@ -121,6 +121,7 @@ module Main =
             |> Optic.set (Model.CurrentPage_) route
           m', []
       | Docs subRoute ->
+          console.log subRoute
           let m' =
             model
             |> Optic.set (Model.SubModels_ >-> SubModels.Docs_) (Pages.Docs.Dispatcher.Model.Initial(subRoute))
@@ -191,7 +192,7 @@ module Main =
     let pageHtml =
       match model.CurrentPage with
       | Index -> Html.map IndexActions (Pages.Index.view model.SubModels.Index.Value)
-      | Docs subRoute -> Html.map DocsDispatcherAction (Pages.Docs.Dispatcher.view model.SubModels.Docs.Value subRoute)
+      | Docs subRoute -> Html.map DocsDispatcherAction (Pages.Docs.Dispatcher.view ())
       | Sample subRoute -> Html.map SampleDispatcherAction (Pages.Sample.Dispatcher.view model.SubModels.Sample.Value subRoute)
       | About -> Html.map AboutActions (Pages.About.view model.SubModels.About.Value)
 
@@ -207,19 +208,28 @@ module Main =
     div
       []
       [ div
-          [ classy "container" ]
-          [ navbarHtml
+          [ classy "navbar-bg" ]
+          [ div
+              [ classy "container" ]
+              [ navbarHtml
+              ]
           ]
         headerHtml
         pageHtml
       ]
 
+  // Customs helpers over the RouteParser
+  let (<?>) p1 p2  =
+    p1 .>> pchar '?' .>>. p2
+
+  let (<=.>) p1 p2  =
+    p1 >>. pchar '=' >>. p2
 
   let routes =
     [
       runM (NavigateTo Index) (pStaticStr "/" |> (drop >> _end))
       runM (NavigateTo (Docs DocsApi.Index)) (pStaticStr "/docs" |> (drop >> _end))
-      runM (NavigateTo (Docs DocsApi.HMR)) (pStaticStr "/docs/hmr" |> (drop >> _end))
+      runM1 (fun x -> NavigateTo (Docs (DocsApi.Viewer x))) ((pStaticStr "/docs") <?> (pStaticStr "fileName") <=.> pString)
       runM (NavigateTo (Sample SampleApi.Clock)) (pStaticStr "/sample/clock" |> (drop >> _end))
       runM (NavigateTo (Sample SampleApi.Counter)) (pStaticStr "/sample/counter" |> (drop >> _end))
       runM (NavigateTo (Sample SampleApi.HelloWorld)) (pStaticStr "/sample/hello-world" |> (drop >> _end))
