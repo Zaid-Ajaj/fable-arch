@@ -1,5 +1,3 @@
- - tagline: How to use Hot Module Replacement with Fable-VirtualDom
-
 # Hot Module Replacement
 
 According to webpack website:
@@ -63,7 +61,7 @@ if isNotNull Module.hot then
 App.Main.start contentNode ()
 ```
 
-The file `Main.fsx` is a Fable-VirtualDom application with some configuration to support the HMR. 
+The file `Main.fsx` is a Fable-VirtualDom application with some configuration to support the HMR.
 
 ```fsharp
 type Model =
@@ -104,18 +102,18 @@ We used the `window?storage` to store the state of our application on each updat
 
 ## Known limitations
 
-There is some limitation with the actual way to maintain the state. All your application state stored in the model is working. 
+There is some limitation with the actual way to maintain the state. All your application state stored in the model is working.
 
-But you will lose the focus on the current node (input, textarea, etc.) because it's not stored in your model. 
+But you will lose the focus on the current node (input, textarea, etc.) because it's not stored in your model.
 And Fable-VirtualDom is going to redraw your application on reload.
 
 ## Can I use it ?
 
-Definitely yes, I am actually using this template for all my Fable-VirtualDom projects. 
+Definitely yes, I am actually using this template for all my Fable-VirtualDom projects.
 You just need to clone the repo and follow the [How to use in development mode ?](#How-to-use-in-development-mode) to start playing with this starter.
 
 ## Bonus
 
-The embedded webpack is also configure to generate production ready files. 
+The embedded webpack is also configure to generate production ready files.
 
 You just run the command `npm run build` and got the folder `public/` generated with all the files need for your client side.

@@ -29,7 +29,7 @@ module Main =
       Index: Pages.Index.Model option
       About: Pages.About.Model option
       User: Pages.User.Dispatcher.Model option
-      Docs: Pages.Docs.Dispatcher.Model option
+      Docs: Pages.Docs.Dispatcher.Model
       Sample: Pages.Sample.Dispatcher.Model option
     }
 
@@ -40,7 +40,7 @@ module Main =
         Index = None
         About = None
         User = None
-        Docs = None
+        Docs = Pages.Docs.Dispatcher.Model.Initial (DocsApi.Index)
         Sample = None
       }
 
@@ -57,7 +57,7 @@ module Main =
       (fun r -> r.User), (fun v r -> { r with User = Some v } )
 
     static member Docs_ =
-      (fun r -> r.Docs), (fun v r -> { r with Docs = Some v } )
+      (fun r -> r.Docs), (fun v r -> { r with Docs = v } )
 
     static member Sample_ =
       (fun r -> r.Sample), (fun v r -> { r with Sample = Some v } )
@@ -121,16 +121,24 @@ module Main =
             |> Optic.set (Model.CurrentPage_) route
           m', []
       | Docs subRoute ->
-          console.log subRoute
+          // Info: We don't set a new value for SubModels.Docs because the value is set at the start of the app
+          // and we want to keep the Docs value in "memory" to avoid get doc markdown files severals times
           let m' =
             model
-            |> Optic.set (Model.SubModels_ >-> SubModels.Docs_) (Pages.Docs.Dispatcher.Model.Initial(subRoute))
             |> Optic.set (Model.SubModels_ >-> SubModels.Header_ >-> Header.Model.CurrentPage_) route
             |> Optic.set (Model.SubModels_ >-> SubModels.Menu_ >-> Menu.Model.CurrentPage_) route
             |> Optic.set (Model.SubModels_ >-> SubModels.Navbar_ >-> Navbar.Model.CurrentPage_) route
             |> Optic.set (Model.CurrentPage_) route
 
-          m', []
+          let message =
+            match subRoute with
+            | DocsApi.Index -> []
+            | DocsApi.Viewer fileName ->
+              [ fun h ->
+                  h (DocsDispatcherAction (Pages.Docs.Dispatcher.ViewerActions (Pages.Docs.Viewer.SetDoc fileName)))
+              ]
+
+          m', message
       | Sample subRoute ->
           let m' =
             model
@@ -157,7 +165,7 @@ module Main =
         let m' = Optic.set (Model.SubModels_ >-> SubModels.User_) res model
         m', action'
     | DocsDispatcherAction act ->
-        let (res, action) = Pages.Docs.Dispatcher.update model.SubModels.Docs.Value act
+        let (res, action) = Pages.Docs.Dispatcher.update model.SubModels.Docs act
         let action' = mapActions DocsDispatcherAction action
         let m' = Optic.set (Model.SubModels_ >-> SubModels.Docs_) res model
         m', action'
@@ -192,7 +200,7 @@ module Main =
     let pageHtml =
       match model.CurrentPage with
       | Index -> Html.map IndexActions (Pages.Index.view model.SubModels.Index.Value)
-      | Docs subRoute -> Html.map DocsDispatcherAction (Pages.Docs.Dispatcher.view ())
+      | Docs subRoute -> Html.map DocsDispatcherAction (Pages.Docs.Dispatcher.view model.SubModels.Docs subRoute)
       | Sample subRoute -> Html.map SampleDispatcherAction (Pages.Sample.Dispatcher.view model.SubModels.Sample.Value subRoute)
       | About -> Html.map AboutActions (Pages.About.view model.SubModels.About.Value)
 
@@ -229,7 +237,7 @@ module Main =
     [
       runM (NavigateTo Index) (pStaticStr "/" |> (drop >> _end))
       runM (NavigateTo (Docs DocsApi.Index)) (pStaticStr "/docs" |> (drop >> _end))
-      runM1 (fun x -> NavigateTo (Docs (DocsApi.Viewer x))) ((pStaticStr "/docs") <?> (pStaticStr "fileName") <=.> pString)
+      runM1 (fun fileName -> NavigateTo (Docs (DocsApi.Viewer fileName))) ((pStaticStr "/docs") <?> (pStaticStr "fileName") <=.> pString)
       runM (NavigateTo (Sample SampleApi.Clock)) (pStaticStr "/sample/clock" |> (drop >> _end))
       runM (NavigateTo (Sample SampleApi.Counter)) (pStaticStr "/sample/counter" |> (drop >> _end))
       runM (NavigateTo (Sample SampleApi.HelloWorld)) (pStaticStr "/sample/hello-world" |> (drop >> _end))

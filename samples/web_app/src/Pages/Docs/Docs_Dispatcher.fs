@@ -13,17 +13,17 @@ open WebApp.Common
 module Dispatcher =
 
   type Model =
-    { Viewer: Viewer.Model option
+    { Viewer: Viewer.Model
     }
 
-    static member Generate (?viewer) =
-      { Viewer = viewer
+    static member Generate () =
+      { Viewer = Viewer.Model.Initial
       }
 
     static member Initial (currentPage: DocsApi.Route) =
       match currentPage with
       | DocsApi.Index-> Model.Generate ()
-      | DocsApi.Viewer fileName -> Model.Generate (viewer = Viewer.Model.Initial(fileName))
+      | DocsApi.Viewer fileName -> Model.Generate ()
 
   type Actions
     = NoOp
@@ -34,9 +34,9 @@ module Dispatcher =
     | NoOp ->
         model, []
     | ViewerActions act ->
-        let (res, action) = Viewer.update model.Viewer.Value act
+        let (res, action) = Viewer.update model.Viewer act
         let action' = mapActions ViewerActions action
-        { model with Viewer = Some res}, action'
+        { model with Viewer = res}, action'
 
 
   type TileDocs =
@@ -69,7 +69,7 @@ module Dispatcher =
       [ classy "tile is-vertical is-6" ]
       (tiles |> List.map tileDocs)
 
-  let view () =
+  let indexView =
     div
       [ classy "container" ]
       [ div
@@ -107,5 +107,13 @@ module Dispatcher =
                     }
                   ]
               ]
-        ]
-    ]
+          ]
+      ]
+
+
+  let view model subRoute =
+    match subRoute with
+    | DocsApi.Index -> indexView
+    | DocsApi.Viewer fileName -> Html.map ViewerActions (Viewer.view model.Viewer)
+
+

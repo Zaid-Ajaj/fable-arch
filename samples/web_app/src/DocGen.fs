@@ -10,10 +10,13 @@ module DocGen =
 
   let sampleSourceDirectory = "src/Pages/Sample"
 
-  let docFilesDirectory = "doc_files"
-
   let createSampleURL file =
     sprintf "/%s/%s" sampleSourceDirectory file
+
+  let docFilesDirectory = "doc_files"
+
+  let createDocFilesDirectoryURL fileName =
+    sprintf "/%s/%s.md" docFilesDirectory fileName
 
   let createDocURL fileName =
     sprintf "#/docs?fileName=%s" fileName
